@@ -82,12 +82,19 @@ class Matrix:
         except IndexError:
             return 0
 
+    def insert(self, index, line):
+        v = Vector(line)
+        if self._valid_vector(v) or self.shape == (0,0):
+            self.data.insert(index, v)
+        else:
+            raise AttributeError('Can only append vectors with the same number of elements as the matrix ncols.')
+
     def append(self, line):
         v = Vector(line)
         if self._valid_vector(v) or self.shape == (0,0):
             self.data.append(v)
         else:
-            raise AttributeError('Can only append vectors with the same number of columns as the matrix.')
+            raise AttributeError('Can only append vectors with the same number of elements as the matrix ncols.')
 
     def swap(self, i, j):
         aux = self[i]
@@ -217,20 +224,23 @@ class Matrix:
             new_matrix.append(row)
         return new_matrix
 
-    def det_recursive(self):
-        if not self.square_matrix: raise exceptions.ArrayLengthError('Can only measure the determinant of a square matrix.')
-        if self.nrows == 1: return self[0][0]
-        partial_sum = 0
-        for j, x in enumerate(self[0]):
-            partial_sum += (-1)**j * x * self.submatrix(0, j).det_recursive()
-        return partial_sum
+    # def det_recursive(self):
+    #     if not self.square_matrix: raise exceptions.ArrayLengthError('Can only measure the determinant of a square matrix.')
+    #     if self.nrows == 1: return self[0][0]
+    #     partial_sum = 0
+    #     for j, x in enumerate(self[0]):
+    #         partial_sum += (-1)**j * x * self.submatrix(0, j).det_recursive()
+    #     return partial_sum
 
     def det(self):
-        l, u = self.lu_decomp()
+        try:
+            l, u, p, sign = self.lu()
+        except exceptions.LinearDependencyError:
+            return 0
         det = 1
         for i in range(self.nrows):
-            det += u[i][i]
-        return det
+            det *= u[i][i]
+        return sign * det
 
     def is_upper_trig(self):
         for i in range(self.nrows):
@@ -294,25 +304,23 @@ class Matrix:
                 x.append(partial / self[i][i])
             return x
 
-    def lu_decomp(self):
+    def lu(self):
         if not self.square_matrix():
             raise exceptions.ArrayLengthError('Can\'t decompose non-square matrix.')
         N = self.nrows
         LU = Matrix(self)
         p = Matrix.identity(N)
+        swap_count = 0
         for linha_pivotal in range(N):
             pivotal_col = LU.getcol(linha_pivotal)[linha_pivotal:]
             i, pivot = pivotal_col.max()
             if pivot == 0:
-                # print('ERROR!')
-                # print('Pivotal col:', pivotal_col)
-                # print(self)
-                # print(LU)
-                # print('Pivot:', linha_pivotal)
                 raise exceptions.LinearDependencyError('Can\'t decompose a singular matrix (det = 0).')
             i += linha_pivotal
-            p.swap(linha_pivotal, i)
-            LU.swap(linha_pivotal, i)
+            if linha_pivotal != i:
+                p.swap(linha_pivotal, i)
+                LU.swap(linha_pivotal, i)
+                swap_count += 1
             for linha_atual in range(linha_pivotal + 1, N):
                 mult = LU[linha_atual][linha_pivotal] / pivot
                 LU[linha_atual][linha_pivotal] = mult
@@ -322,9 +330,10 @@ class Matrix:
         for i in range(N):
             L[i][i] = 1
         U = LU.get_upper_trig()
-        return L, U, p
+        return L, U, p, (-1)**swap_count
 
-    # def lu_decomp(self):
+    # def lu(self):
+    #     # sem pivotacao
     #     if not self.square_matrix():
     #         raise exceptions.ArrayLengthError('Can\'t decompose non-square matrix.')
     #     N = self.nrows
@@ -340,6 +349,7 @@ class Matrix:
 
     @staticmethod
     def _quicksolve(l, u, b):
+        # uses pre-made LU decomposition to solve Ax = b
         x = Matrix()
         for i in range(b.ncols):
             y = l._successive_substitutions(b.getcol(i))
@@ -353,8 +363,9 @@ class Matrix:
             pass
         else:
             raise NotImplementedError('Please insert a matrix or a vector of independent coefficients.')
-        l, u, p = self.lu_decomp()
+        l, u, p, sign = self.lu()
         x = self._quicksolve(l, u, p*b)
+        # daqui em diante é só refinamento
         r = self * x - b
         error = r.norm(2) / x.norm(2)
         while error > max_error:
@@ -362,9 +373,9 @@ class Matrix:
             x += c
             r = self * x - b
             error = r.norm(2) / x.norm(2)
-            print(error)
         return x
 
     def inv(self):
         if not self.square_matrix: raise exceptions.ArrayLengthError('Can only invert a square matrix.')
-        return self.solve(Matrix.identity(self.nrows))
+        I = Matrix.identity(self.nrows)
+        return self.solve(I)

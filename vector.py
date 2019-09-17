@@ -1,4 +1,8 @@
 import math
+import pdb
+
+import numpy as np
+
 import exceptions
 
 
@@ -23,6 +27,12 @@ class Vector:
             raise AttributeError('Can only append numeric values to a vector.')
         self.vector.append(value)
 
+    def apply(self, func):
+        v = Vector()
+        for x in self:
+            v.append(func(x))
+        return v
+
     def angle(self, other):
         # uv = |u||v|cos(theta) => theta = acos(uv/|u||v|)
         other = Vector(other)
@@ -39,9 +49,20 @@ class Vector:
                 index = i
         return index, value
 
+    def sum(self):
+        return self.sumpow(1)
+
+    def sumpow(self, power):
+        if power == 0: return len(self)
+        partial = 0
+        for x in self:
+            partial += x**power
+        return partial
+
     @staticmethod
     def _is_numeric(value):
-        return type(value) in (float, int)
+        attrs = ('__add__', '__sub__', '__mul__', '__truediv__', '__pow__')
+        return all(hasattr(value, attr) for attr in attrs)
 
     @staticmethod
     def _is_iterable(iterable):
@@ -109,8 +130,9 @@ class Vector:
             product = 0
             for x, y in zip(self, other):
                 product += x * y
-        elif not self.__same_size(other):
-            raise ArrayLengthError('Both vectors must be equal length.')
+        elif not self._same_size(other):
+            pdb.set_trace()
+            raise exceptions.ArrayLengthError('Both vectors must be equal length.')
         else:
             return NotImplemented
         return product
