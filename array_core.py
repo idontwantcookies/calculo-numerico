@@ -1,4 +1,4 @@
-import pdb
+import random
 
 
 def dim(obj) -> int:
@@ -10,11 +10,121 @@ def dim(obj) -> int:
     if type(obj) == str: return 0   # avoiding inf recursion and considering str as single element
     try:
         iter(obj)
+        obj[0]
         return 1 + dim(obj[0])
     except TypeError:
         return 0
+    except IndexError:
+        return 0
+
+def all_elements_have_same_length(iterable):
+    if dim(iterable) == 0: return True
+    for x, y in zip(iterable[1:], iterable[:-1]):
+        if dim(x) != dim(y):
+            return False
+        elif dim(x) > 0 and len(x) != len(y):
+            return False
+    return all_elements_have_same_length(iterable[0])
+
+def shape(obj, shape_t=None) -> tuple:
+    if shape_t is None: shape_t = []
+    if dim(obj) == 0: 
+        return
+    shape_t.append(len(obj))
+    shape(obj[0], shape_t)
+    return tuple(shape_t)
 
 class Array(list):
+    def __init__(self, iterable=None):
+        if iterable is None: iterable = []
+        iterable = iterable.copy()
+        if dim(iterable) > 1:
+            for i, x in enumerate(iterable):
+                iterable[i] = self.__class__(x)
+        super().__init__(iterable)
+        self._raise_if_diff_dimensions()
+
+    @classmethod
+    def zeros(cls, *shape):
+        if len(shape) == 1:
+            return cls([0] * shape[0])
+        else:
+            return cls([cls.zeros(*shape[1:])] * shape[0])
+
+    @classmethod
+    def identity(cls, n):
+        result = cls.zeros(n, n)
+        for i in range(n):
+            result[i][i] = 1
+        return result
+
+    @classmethod
+    def randint(cls, *shape):
+        if len(shape) == 1:
+            result = cls()
+            for i in range(shape[0]):
+                result.append(random.randint(0,100))
+            return result
+        else:
+            result = cls()
+            for i in range(shape[0]):
+                result.append(cls.randint(*shape[1:]))
+            return result
+
+    def transpose(self):
+        if self.ndim == 1:
+            t = self.__class__([self])
+            t = t.transpose()
+        elif self.ndim == 2:
+            t = self.__class__()
+            for j in range(self.shape[1]):
+                t.append(self.getcol(j))
+            return t
+        else:
+            raise IndexError('Can\'t transpose an array with dim not in (1,2).')
+        return t
+
+    def full_equal(self, other):
+        if self.ndim != dim(other):
+            return False
+        elif not all_elements_have_same_length(other):
+            return False
+        elif len(self) != len(other):
+            return False
+        elif self.ndim == 1:
+            return all(self == other)
+        else:
+            for i in range(self.shape[0]):
+                if not self[i].full_equal(other[i]): return False
+            return True
+
+    @property
+    def simmetrical(self):
+        return self.full_equal(self.transpose())
+
+    def _raise_if_diff_dimensions(self):
+        if not all_elements_have_same_length(self):
+            raise IndexError('All dimensions must have a constant number of elements.')
+
+    def getcol(self, col):
+        result = self.__class__()
+        for row in self:
+            result.append(row[col])
+        return result
+
+
+    def append(self, *args, **kwargs):
+        super().append(*args, **kwargs)
+        self._raise_if_diff_dimensions()
+
+    def insert(self, *args, **kwargs):
+        super().insert(*args, **kwargs)
+        self._raise_if_diff_dimensions()
+
+    @property
+    def shape(self):
+        return shape(self)
+
     @property
     def ndim(self):
         return dim(self)
@@ -149,14 +259,25 @@ class Array(list):
     def __le__(self, other):
         return self < other | self == other
 
+    def _raise_if_invalid_matprod(self, other):
+        if self.shape[1] != other.shape[0]:
+            raise IndexError('Left side must have the same number of columns as rows on the right side for matmul (@).')
+
     def __matmul__(self, other):
-        if dim(self) == dim(other) == 1:
-            return sum(self * other)
+        if dim(other) > 0 and not isinstance(other, self.__class__):
+            other = self.__class__(other)
+        if dim(self) == dim(other) == 1:    # scalar product
+            result = sum(self * other)
         elif dim(self) == dim(other) == 2:
-            # TODO matrix multiplication
-            pass
+            self._raise_if_invalid_matprod(other)
+            result = self.__class__.zeros(self.shape[0], other.shape[1])
+            for i in range(len(self)):
+                for j in range(other.shape[1]):
+                    # print(result)
+                    result[i][j] = self[i] @ other.getcol(j)
         elif dim(self) == 2 and dim(other) == 1:
-            # TODO matrix-vector multiplication
-            pass
+            other = self.__class__([other]).transpose()
+            result = (self @ other).getcol(0)
         else:
             self._raise_mult_len_error()
+        return result

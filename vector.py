@@ -23,7 +23,7 @@ class Vector:
                 self.__vector.append(x)
 
     def append(self, value):
-        if type(value) not in (int, float):
+        if not self._is_numeric(value):
             raise AttributeError('Can only append numeric values to a vector.')
         self.vector.append(value)
 

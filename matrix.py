@@ -1,4 +1,5 @@
 import random
+import math
 
 from vector import Vector
 import exceptions
@@ -132,9 +133,13 @@ class Matrix:
     def _valid_matrix_prod(self, matrix):
         return type(matrix) == Matrix and self.ncols == matrix.nrows
 
-    property
+    @property
     def square_matrix(self):
         return self.nrows == self.ncols
+
+    @property
+    def simmetrical(self):
+        return self == self.transpose()
 
     def __init__(self, data=None):
         if data is None: data = []
@@ -224,13 +229,14 @@ class Matrix:
             new_matrix.append(row)
         return new_matrix
 
-    # def det_recursive(self):
-    #     if not self.square_matrix: raise exceptions.ArrayLengthError('Can only measure the determinant of a square matrix.')
-    #     if self.nrows == 1: return self[0][0]
-    #     partial_sum = 0
-    #     for j, x in enumerate(self[0]):
-    #         partial_sum += (-1)**j * x * self.submatrix(0, j).det_recursive()
-    #     return partial_sum
+    def det_recursive(self):
+        # use this ONLY for didatic purposes; VERY SLOW on n > 4
+        if not self.square_matrix: raise exceptions.ArrayLengthError('Can only measure the determinant of a square matrix.')
+        if self.nrows == 1: return self[0][0]
+        partial_sum = 0
+        for j, x in enumerate(self[0]):
+            partial_sum += (-1)**j * x * self.submatrix(0, j).det_recursive()
+        return partial_sum
 
     def det(self):
         try:
@@ -304,8 +310,8 @@ class Matrix:
                 x.append(partial / self[i][i])
             return x
 
-    def lu(self):
-        if not self.square_matrix():
+    def lu(self, debug=False):
+        if not self.square_matrix:
             raise exceptions.ArrayLengthError('Can\'t decompose non-square matrix.')
         N = self.nrows
         LU = Matrix(self)
@@ -321,6 +327,9 @@ class Matrix:
                 p.swap(linha_pivotal, i)
                 LU.swap(linha_pivotal, i)
                 swap_count += 1
+            if debug:
+                print(LU[linha_pivotal:])
+                print('-'*80)
             for linha_atual in range(linha_pivotal + 1, N):
                 mult = LU[linha_atual][linha_pivotal] / pivot
                 LU[linha_atual][linha_pivotal] = mult
@@ -332,20 +341,37 @@ class Matrix:
         U = LU.get_upper_trig()
         return L, U, p, (-1)**swap_count
 
-    # def lu(self):
-    #     # sem pivotacao
-    #     if not self.square_matrix():
-    #         raise exceptions.ArrayLengthError('Can\'t decompose non-square matrix.')
-    #     N = self.nrows
-    #     U = Matrix(self)
-    #     L = Matrix.identity(N)
-    #     for linha_pivotal in range(N - 1):
-    #         pivot = U[linha_pivotal][linha_pivotal]
-    #         for linha_atual in range(linha_pivotal + 1, N):
-    #             mult = U[linha_atual][linha_pivotal] / pivot
-    #             L[linha_atual][linha_pivotal] = mult
-    #             U[linha_atual] -= mult * U[linha_pivotal]
-    #     return L, U.get_upper_trig()
+    def cholesky(self):
+        if not self.square_matrix:
+            raise exceptions.ArrayLengthError('Can\'t decompose non-square matrix.')
+        if not self.simmetrical:
+            raise exceptions.MatrixTypeError('Can\'t use Cholesky decomposition on asymmetrical matrix.')
+        L = Matrix.zeros(self.nrows, self.nrows)
+        for j in range(self.nrows):
+            part_sum = self[j][j] - sum(x**2 for x in L[j])
+            if part_sum == 0:
+                raise exceptions.LinearDependencyError('Can\'t decompose singular matrix (det = 0).')
+            L[j][j] = part_sum ** 0.5
+            for i in range(j+1, self.nrows):
+                row = L[i][:i]
+                col = L[j][:i]
+                L[i][j] = (self[i][j] - row * col) / L[j][j]
+        return L
+
+    def lu_no_pivot(self):
+        # use for didatic purposes only. Very prone to errors.
+        if not self.square_matrix:
+            raise exceptions.ArrayLengthError('Can\'t decompose non-square matrix.')
+        N = self.nrows
+        U = Matrix(self)
+        L = Matrix.identity(N)
+        for linha_pivotal in range(N - 1):
+            pivot = U[linha_pivotal][linha_pivotal]
+            for linha_atual in range(linha_pivotal + 1, N):
+                mult = U[linha_atual][linha_pivotal] / pivot
+                L[linha_atual][linha_pivotal] = mult
+                U[linha_atual] -= mult * U[linha_pivotal]
+        return L, U.get_upper_trig()
 
     @staticmethod
     def _quicksolve(l, u, b):
