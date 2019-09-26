@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from lib import linalg
+from src import linalg
 
 
 class LinalgTest(unittest.TestCase):
