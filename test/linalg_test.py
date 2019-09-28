@@ -51,5 +51,11 @@ class LinalgTest(unittest.TestCase):
         x = linalg.solve(self.A, b)
         self.assertTrue((x == [0, 1]).all())
 
+    def test_inv(self):
+        inv = linalg.inv(self.A)
+        e = self.A @ inv
+        e = e.round()
+        self.assertTrue((e == np.identity(len(self.A))).all())
+
 if __name__ == '__main__':
     unittest.main()

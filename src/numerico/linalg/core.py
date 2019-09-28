@@ -1,14 +1,15 @@
+import pdb
 import numpy as np
 
 from .lu import LUDecomp as _LU
 from .cholesky import Cholesky as _Cholesky
 
 
-def main_diag_product(a):
-    prod = 1
-    for i in range(a.shape[0]):
-        prod *= a[i, i]
-    return prod
+def square(a):
+    return a.shape[0] == a.shape[1]
+
+def simmetrical(a):
+    return (a == a.T).all()
 
 def lu(a, *args, **kwargs):
     dec = _LU(*args, **kwargs)
@@ -51,16 +52,27 @@ def retroactive_substitutions(a, b):
 def det(a):
     try:
         if is_lower_trig(a) or is_upper_trig(a):
-            return main_diag_product(a)
-        elif (a == a.T).all():
+            a.diagonal().prod()
+        elif simmetrical(a):
             l = cholesky(a)
-            return main_diag_product(l)**2
+            return l.diagonal().prod()**2
         else:
             dec = _LU()
             l, u, p, sign = dec(a)
-            return sign * main_diag_product(u)
+            return sign * u.diagonal().prod()
     except ZeroDivisionError:
         return 0
+
+def decomp(a):
+    if not square(a): raise ValueError('a must be a square matrix.')
+    if simmetrical(a):
+        l = cholesky(a)
+        u = l.T
+        p = np.identity(len(a))
+        sign = +1
+    else:
+        l, u, p, sign = lu(a)
+    return l, u, p, sign
 
 def quicksolve(l, u, b):
     if not u.shape == l.shape:
@@ -70,9 +82,17 @@ def quicksolve(l, u, b):
     return x
 
 def solve(a, b):
-    if (a == a.T).all():
-        l = cholesky(a)
-        return quicksolve(l, l.T, b)
-    else:
-        l, u, p, sign = lu(a)
-        return quicksolve(l, u, p@b)
+    l, u, p, sign = decomp(a)
+    return quicksolve(l, u, p@b)
+
+def inv(a):
+    try:
+        l, u, p, sign = decomp(a)
+    except ZeroDivisionError:
+        raise ZeroDivisionError('Can\'t invert a singular matrix (det = 0).')
+    n = len(a)
+    e = p @ np.identity(n)
+    out = []
+    for i in range(n):
+        out.append(quicksolve(l, u, e[:, i]))
+    return np.array(out).T
