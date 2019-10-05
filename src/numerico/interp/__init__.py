@@ -1,1 +1,1 @@
-from .core import choose_points, vandermonde, Lagrange, Newton
+from .core import choose_points, vandermonde, Lagrange, Newton, GregoryNewton
