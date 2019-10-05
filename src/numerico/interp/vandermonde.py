@@ -4,7 +4,7 @@ from ..linalg import solve
 
 class Vandermonde:
     def __init__(self, x, y):
-        self.x, self.y = np.array(x), np.array(y)
+        self.x, self.y = x,copy(), y.copy()
         self.validate_points()
         self.setUp()
 
