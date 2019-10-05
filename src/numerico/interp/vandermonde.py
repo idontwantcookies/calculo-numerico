@@ -3,6 +3,12 @@ import numpy as np
 from ..linalg import solve
 
 class Vandermonde:
+    def __init__(self, x, y):
+        self.x = np.array(x)
+        self.y = np.array(y)
+        self.validate_points()
+        self.setUp()
+
     def setUp(self):
         self.n = len(self.x)
         self.rank = self.n - 1
@@ -17,12 +23,16 @@ class Vandermonde:
         if self.x.ndim != 1:
             raise ValueError('Please pass x and y as separate one-dimensional arrays.')
 
-    def __call__(self, x, y):
-        self.x, self.y = np.array(x), np.array(y)
-        self.validate_points()
-        self.setUp()
-        coefs = solve(self.V, self.y)
-        coefs = list(reversed(coefs))
-        coefs = np.array(coefs)
-        coefs = np.poly1d(coefs)
-        return coefs
+    @property
+    def coefs(self):
+        if hasattr(self, '_coefs'):
+            return self._coefs
+        else:
+            self._coefs = solve(self.V, self.y)
+            self._coefs = list(reversed(self._coefs))
+            self._coefs = np.array(self._coefs)
+            self._coefs = np.poly1d(self._coefs)
+            return self._coefs
+
+    def __call__(self, x_est):
+        return np.polyval(self.coefs, x_est)

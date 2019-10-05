@@ -21,9 +21,9 @@ class InterpTest(unittest.TestCase):
     def test_vandermonde_ranks(self):
         for i in range(1, 6):
             x, y = random_points(rank=i)
-            p = interp.vandermonde(x, y)
+            vdm = interp.Vandermonde(x, y)
             for x_i, y_i in zip(x, y):
-                self.assertEqual(round(np.polyval(p, x_i)), y_i)
+                self.assertEqual(round(vdm(x_i)), y_i)
 
     def test_lagrange1(self):
         lg = interp.Lagrange(self.x[:-1], self.y[:-1])
