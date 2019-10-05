@@ -6,8 +6,6 @@ class Cholesky:
         self.precision = precision
 
     def setUp(self, a):
-        if (a != a.T).any() or a.ndim != 2:
-            raise ValueError('Can\'t use Cholesky to decompose non-simmetrical array.')
         self.a = a
         self.n = self.a.shape[0]
         self.L = np.zeros_like(self.a).astype(complex)

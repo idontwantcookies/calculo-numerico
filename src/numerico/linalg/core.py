@@ -1,4 +1,4 @@
-import numpy as np
+import numpy as _np
 
 from .lu import LUDecomp as _LU
 from .cholesky import Cholesky as _Cholesky
@@ -50,7 +50,7 @@ def successive_substitutions(a, b, skip_check=False):
     if not skip_check and not is_lower_trig(a):
         raise ValueError('a must be a lower trig matrix.')
     b = b.copy()
-    x = np.zeros_like(b)
+    x = _np.zeros_like(b)
     for i in range(a.shape[0]):
         x[i] = (b[i] - (x[:i] * a[i, :i]).sum()) / a[i, i]
     return x
@@ -69,7 +69,7 @@ def retroactive_substitutions(a, b, skip_check=False):
     if not skip_check and not is_upper_trig(a):
         raise ValueError('a must be an upper trig matrix.')
     b = b.copy()
-    x = np.zeros_like(b)
+    x = _np.zeros_like(b)
     for i in range(a.shape[0] - 1, -1, -1):
         x[i] = (b[i] - (x[i:] * a[i, i:]).sum()) / a[i, i]
     return x
@@ -96,7 +96,7 @@ def decomp(a):
     if simmetrical(a):
         l = cholesky(a)
         u = l.T
-        p = np.identity(len(a))
+        p = _np.identity(len(a))
         sign = +1
     else:
         l, u, p, sign = lu(a)
@@ -127,4 +127,4 @@ def inv(a):
     out = []
     for i in range(n):
         out.append(quicksolve(l, u, e[:, i], skip_check=True))
-    return np.array(out).T
+    return _np.array(out).T
