@@ -25,8 +25,21 @@ class InterpTest(unittest.TestCase):
         x = np.array([0.1, 0.6, 0.8])
         y = np.array([1.221, 3.320, 4.953])
         lg = interp.Lagrange(x, y)
-        pred = lg(x_est=0.2, rank=2)
+        pred = lg(x_est=0.2)
         self.assertEqual(pred, 1.4141142857142863)
+        # TODO: not working
+        # lg = interp.Lagrange(x[:-1], y[:-1])
+        # pred = lg(x_est=0.2)
+        # print(lg.G)
+        # self.assertEqual(pred, 2.829257142857143)
+
+    def test_newton(self):
+        x = np.array([0.1, 0.6])
+        y = np.array([1.221, 3.320])
+        n = interp.Newton(x, y)
+        pred = n(x_est=0.2)
+        self.assertEqual(pred, 1.6408)
+
 
 if __name__ == '__main__':
     unittest.main()

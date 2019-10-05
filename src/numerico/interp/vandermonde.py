@@ -18,7 +18,7 @@ class Vandermonde:
             raise ValueError('Please pass x and y as separate one-dimensional arrays.')
 
     def __call__(self, x, y):
-        self.x, self.y = x, y
+        self.x, self.y = np.array(x), np.array(y)
         self.validate_points()
         self.setUp()
         coefs = solve(self.V, self.y)
