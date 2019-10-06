@@ -1,24 +1,16 @@
-import numpy as _np
+import numpy as np
 
-from .lu import LUDecomp as _LU
-from .cholesky import Cholesky as _Cholesky
+from .cholesky import Cholesky
+from .lu import LU
 
 
 def square(a):
-    '''Testa se um array é quadrado.'''
+    '''Testa se um array é matriz quadrada.'''
     return a.ndim == 2 and a.shape[0] == a.shape[1]
 
 def simmetrical(a):
     '''Testa se uma matriz é simétrica fazendo sua transposição.'''
     return (a == a.T).all()
-
-def lu(a, *args, **kwargs):
-    dec = _LU(*args, **kwargs)
-    return dec(a)
-
-def cholesky(a, *args, **kwargs):
-    dec = _Cholesky(*args, **kwargs)
-    return dec(a)
 
 def is_lower_trig(a):
     '''Testa se uma matriz é triangular inferior.
@@ -49,8 +41,8 @@ def successive_substitutions(a, b, skip_check=False):
 
     if not skip_check and not is_lower_trig(a):
         raise ValueError('a must be a lower trig matrix.')
-    b = b.copy()
-    x = _np.zeros_like(b)
+    b = b.copy().astype(a.dtype)
+    x = np.zeros_like(b)
     for i in range(a.shape[0]):
         x[i] = (b[i] - (x[:i] * a[i, :i]).sum()) / a[i, i]
     return x
@@ -68,8 +60,8 @@ def retroactive_substitutions(a, b, skip_check=False):
 
     if not skip_check and not is_upper_trig(a):
         raise ValueError('a must be an upper trig matrix.')
-    b = b.copy()
-    x = _np.zeros_like(b)
+    b = b.copy().astype(a.dtype)
+    x = np.zeros_like(b)
     for i in range(a.shape[0] - 1, -1, -1):
         x[i] = (b[i] - (x[i:] * a[i, i:]).sum()) / a[i, i]
     return x
@@ -80,10 +72,11 @@ def det(a):
         if is_lower_trig(a) or is_upper_trig(a):
             return a.diagonal().prod()
         elif simmetrical(a):
-            l = cholesky(a)
+            dec = Cholesky()
+            l = dec(a)
             return l.diagonal().prod()**2
         else:
-            dec = _LU()
+            dec = LU()
             l, u, p, sign = dec(a)
             return sign * u.diagonal().prod()
     except ZeroDivisionError:
@@ -94,12 +87,14 @@ def decomp(a):
     usando LU.'''
     if not square(a): raise ValueError('a must be a square matrix.')
     if simmetrical(a):
-        l = cholesky(a)
+        dec = Cholesky()
+        l = dec(a)
         u = l.T
-        p = _np.identity(len(a))
+        p = np.identity(len(a))
         sign = +1
     else:
-        l, u, p, sign = lu(a)
+        dec = LU()
+        l, u, p, sign = dec(a)
     return l, u, p, sign
 
 def quicksolve(l, u, b, *args, **kwargs):
@@ -127,4 +122,4 @@ def inv(a):
     out = []
     for i in range(n):
         out.append(quicksolve(l, u, e[:, i], skip_check=True))
-    return _np.array(out).T
+    return np.array(out).T

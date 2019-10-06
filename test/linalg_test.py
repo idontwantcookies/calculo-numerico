@@ -13,7 +13,8 @@ class LinalgTest(unittest.TestCase):
         self.U = np.array([[1,1],[0,9]])
 
     def test_lu(self):
-        l, u, p, sign = linalg.lu(self.A)
+        dec = linalg.LU()
+        l, u, p, sign = dec(self.A)
         self.assertTrue(((l @ u).round() == p @ self.A).all())
 
     def test_det(self):
@@ -21,8 +22,9 @@ class LinalgTest(unittest.TestCase):
         self.assertEqual(linalg.det(self.S), 0)
 
     def test_cholesky(self):
+        dec = linalg.Cholesky()
         X = self.A.T * self.A
-        L = linalg.cholesky(X)
+        L = dec(X)
         mult = (L @ L.T).round()
         self.assertTrue((mult == X).all())
 

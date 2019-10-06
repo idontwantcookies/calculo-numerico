@@ -1,6 +1,7 @@
 import numpy as np
 
-class LUDecomp:
+
+class LU:
     def __init__(self, pivoting=True, debug=False, precision=None):
         self.pivoting = pivoting
         self.debug = debug

@@ -8,28 +8,31 @@ class Linear:
     def __init__(self, x, y):
         '''
         Parâmetros:
-        x: np.array de duas dimensões
-        y: np.array de uma dimensão
+            x: np.array de duas dimensões. Cada linha é um ponto e cada coluna 
+                uma variável.
+            y: np.array de uma dimensão
         '''
-        self.x = x.copy()
+        self.x = np.zeros((x.shape[0], x.shape[1] + 1))
+        self.x[:, 0] = 1
+        self.x[:, 1:] = x
         self.y = y.copy()
-        self.n = self.X.shape[1]
+        self.n = self.x.shape[1]
         self.setUp()
 
-
     def setUp(self):
-        X = np.zeros((self.n + 1, self.n + 1))
-        X[0, 0] = self.X
+        self.X = np.zeros((self.n, self.n))
+        self.Y = np.zeros(self.n)
         for i in range(self.n):
-            X[0, i+1] = self.X[:,i].sum()
-            for j in range(1, self.n):
-
-        self.X = X
+            for j in range(i + 1):
+                element = self.x[:,i] @ self.x[:,j]
+                self.X[i, j] = element
+                self.X[j, i] = element
+            self.Y[i] = self.x[:,i] @ self.y
 
     @property
     def coefs(self):
         if not hasattr(self, '_coefs'):
-            self._coefs = solve(self.X, self.y)
+            self._coefs = solve(self.X, self.Y).real
             self._coefs = list(reversed(self._coefs))
             self._coefs = np.poly1d(self._coefs)
         return self._coefs
