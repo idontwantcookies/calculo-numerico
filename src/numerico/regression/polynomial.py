@@ -3,31 +3,31 @@ import numpy as np
 from ..linalg import solve
 
 
-class Linear:
+class Polynomial:
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, rank=1):
         '''
         Parâmetros:
-            x: np.array de duas dimensões. Cada linha é um ponto e cada coluna 
-                uma variável.
+            x: np.array de uma dimensão (input)
             y: np.array de uma dimensão (output)
         '''
-        self.x = np.zeros((x.shape[0], x.shape[1] + 1))
-        self.x[:, 0] = 1
-        self.x[:, 1:] = x
-        self.y = y.copy()
-        self.n = self.x.shape[1]
+        self.n = rank + 1
+        self.x = [x.shape[0]]
+        self.Y = [y.sum()]
+        for i in range(1, 2 * rank + 1):
+            x_pow = x**i
+            self.x.append((x_pow).sum())
+            if i < self.n:
+                self.Y.append((x_pow * y).sum())
+        self.x, self.Y = np.array(self.x), np.array(self.Y)
         self.setUp()
 
     def setUp(self):
         self.X = np.zeros((self.n, self.n))
-        self.Y = np.zeros(self.n)
         for i in range(self.n):
-            for j in range(i + 1):
-                element = self.x[:,i] @ self.x[:,j]
-                self.X[i, j] = element
-                self.X[j, i] = element
-            self.Y[i] = self.x[:,i] @ self.y
+            for j in range(i+1):
+                self.X[i,j] = self.x[i+j]
+                self.X[j,i] = self.x[i+j]
 
     @property
     def coefs(self):
