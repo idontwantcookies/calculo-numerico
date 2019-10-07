@@ -35,4 +35,5 @@ class Vandermonde:
         return self._coefs
 
     def __call__(self, x_est):
-        return np.polyval(self.coefs, x_est)
+        # return np.polyval(self.coefs, x_est)
+        return self.coefs(x_est)
