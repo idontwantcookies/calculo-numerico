@@ -33,9 +33,8 @@ class Linear:
     def coefs(self):
         if not hasattr(self, '_coefs'):
             self._coefs = solve(self.X, self.Y).real
-            self._coefs = list(reversed(self._coefs))
-            self._coefs = np.poly1d(self._coefs)
         return self._coefs
 
     def __call__(self, x_pred):
-        return self.coefs(x_pred)
+        if np.ndim(x_pred) == 0: x_pred = np.array([x_pred])
+        return self.coefs[1:] @ x_pred + self.coefs[0]

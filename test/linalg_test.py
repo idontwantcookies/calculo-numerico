@@ -11,6 +11,9 @@ class LinalgTest(unittest.TestCase):
         self.S = np.array([[1,2], [2,4]])
         self.L = np.array([[1,0], [2,4]])
         self.U = np.array([[1,1],[0,9]])
+        self.A2 = np.array([[ 5, -1,  2],
+                            [-1,  8,  4],
+                            [ 2,  4,  10]])
 
     def test_lu(self):
         dec = linalg.LU()
@@ -58,6 +61,15 @@ class LinalgTest(unittest.TestCase):
         e = self.A @ inv
         e = e.round()
         self.assertTrue((e == np.identity(len(self.A))).all())
+
+    def test_ldlt(self):
+        dec = linalg.LDLt(precision=4)
+        out = dec(self.A2)
+        expected = np.array([[ 5.,     -0.2,     0.4   ],
+                             [-0.2,     7.8,     0.5641],
+                             [ 0.4,     0.5641,  6.718 ]])
+        self.assertTrue((out == expected).all())
+
 
 if __name__ == '__main__':
     unittest.main()

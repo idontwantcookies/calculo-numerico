@@ -6,7 +6,7 @@ from .newton import Newton
 
 
 class GregoryNewton(Newton):
-    
+
     def validate_points(self):
         super().validate_points()
         diff = self.x[1] - self.x[0]
