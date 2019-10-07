@@ -14,22 +14,37 @@ class LinalgTest(unittest.TestCase):
         self.A2 = np.array([[ 5, -1,  2],
                             [-1,  8,  4],
                             [ 2,  4,  10]])
+        self.X = self.A @ self.A.T
 
     def test_lu(self):
-        dec = linalg.LU()
-        l, u, p, sign = dec(self.A)
-        self.assertTrue(((l @ u).round() == p @ self.A).all())
-
-    def test_det(self):
-        self.assertEqual(linalg.det(self.A), 25)
-        self.assertEqual(linalg.det(self.S), 0)
+        dec = linalg.LU(self.A)
+        self.assertEqual(dec.det, 25)
+        self.assertTrue(((self.A @ dec.inv()).round(5) == np.identity(2)).all())
 
     def test_cholesky(self):
-        dec = linalg.Cholesky()
-        X = self.A.T * self.A
-        L = dec(X)
+        dec = linalg.Cholesky(self.X)
+        L = dec.L
         mult = (L @ L.T).round()
-        self.assertTrue((mult == X).all())
+        self.assertTrue((mult == self.X).all())
+
+    def test_cholesky_det(self):
+        dec = linalg.Cholesky(self.X)
+        self.assertEqual(round(dec.det, 4), 625)
+
+    def test_cholesky_solve(self):
+        b = np.array([1,2])
+        dec = linalg.Cholesky(self.X)
+        x = dec.solve(b)
+        r = (self.X @ x - b).round(4)
+        self.assertEqual(r.sum(), 0)
+
+    def test_cholesky_inv(self):
+        dec = linalg.Cholesky(self.X)
+        inv = dec.inv()
+        e = np.identity(2)
+        r = inv @ self.X - e
+        r = r.round(4)
+        self.assertEqual(r.sum(), 0)
 
     def test_is_lower_trig(self):
         self.assertTrue(linalg.is_lower_trig(self.L))
@@ -51,24 +66,33 @@ class LinalgTest(unittest.TestCase):
         x = linalg.retroactive_substitutions(self.U, b)
         self.assertTrue((x == [1,1]).all())
 
-    def test_solve(self):
-        b = np.array([5, 15])
-        x = linalg.solve(self.A, b)
-        self.assertTrue((x == [0, 1]).all())
-
-    def test_inv(self):
-        inv = linalg.inv(self.A)
-        e = self.A @ inv
-        e = e.round()
-        self.assertTrue((e == np.identity(len(self.A))).all())
-
     def test_ldlt(self):
-        dec = linalg.LDLt(precision=4)
-        out = dec(self.A2)
+        dec = linalg.LDLt(self.A2, precision=4)
+        out = dec.ldlt
         expected = np.array([[ 5.,     -0.2,     0.4   ],
                              [-0.2,     7.8,     0.5641],
                              [ 0.4,     0.5641,  6.718 ]])
         self.assertTrue((out == expected).all())
+
+    def test_ldlt_solve(self):
+        b = np.array([1,2,3])
+        dec = linalg.LDLt(self.A2)
+        x = dec.solve(b)
+        r = self.A2 @ x - b
+        r = r.round(4)
+        self.assertEqual(r.sum(), 0)
+
+    def test_ldlt_inv(self):
+        dec = linalg.LDLt(self.A2)
+        inv = dec.inv()
+        e = np.identity(3)
+        r = e - inv @ self.A2
+        r = r.round(4)
+        self.assertEqual(r.sum(), 0)
+
+    def test_ldlt_det(self):
+        dec = linalg.LDLt(self.A2)
+        self.assertEqual(round(dec.det), 262)
 
 
 if __name__ == '__main__':

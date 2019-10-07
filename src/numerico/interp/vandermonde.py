@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..linalg import solve
+from ..linalg import LU
 
 class Vandermonde:
     
@@ -25,14 +25,14 @@ class Vandermonde:
 
     @property
     def coefs(self):
-        if hasattr(self, '_coefs'):
-            return self._coefs
-        else:
-            self._coefs = solve(self.V, self.y)
-            self._coefs = list(reversed(self._coefs))
-            self._coefs = np.array(self._coefs)
-            self._coefs = np.poly1d(self._coefs)
-            return self._coefs
+        if not hasattr(self, '_coefs'):
+            lu = LU(self.V)
+            out = lu.solve(self.y)
+            out = list(reversed(out))
+            out = np.array(out)
+            out = np.poly1d(out)
+            self._coefs = out
+        return self._coefs
 
     def __call__(self, x_est):
         return np.polyval(self.coefs, x_est)

@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..linalg import solve
+from ..linalg import Cholesky
 
 
 class Linear:
@@ -32,7 +32,8 @@ class Linear:
     @property
     def coefs(self):
         if not hasattr(self, '_coefs'):
-            self._coefs = solve(self.X, self.Y).real
+            chol = Cholesky(self.X)
+            self._coefs = chol.solve(self.Y)
         return self._coefs
 
     def __call__(self, x_pred):

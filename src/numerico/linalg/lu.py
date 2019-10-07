@@ -1,7 +1,10 @@
 import numpy as np
 
+from .core import Decomposition, retroactive_substitutions, \
+                  successive_substitutions
 
-class LU:
+
+class LU(Decomposition):
     '''
     Classe responsável por executar a decomposição LU de uma matriz.
     
@@ -11,25 +14,28 @@ class LU:
     >>> A = np.array([[ 1, -3,  2],
                       [-2,  8, -1],
                       [ 4, -6,  5]])
-    >>> dec = LU()
-    >>> L, U, p, sign = dec(A)
-    >>> print(L)
-    [[ 1.    0.    0.  ]
-     [-0.5   1.    0.  ]
-     [ 0.25 -0.3   1.  ]]
-    >>> print(U)
-    [[ 4.  -6.   5. ]
-     [ 0.   5.   1.5]
-     [ 0.   0.   1.2]]
-    >>> print(p)
+    >>> dec = LU(A)
+    >>> print(dec.LU)
+    [[ 4.   -6.    5.  ]
+     [-0.5   5.    1.5.  ]
+     [ 0.25 -0.3   1.2.  ]]
+    >>> print(dec.p)
     [[0. 0. 1.]
      [0. 1. 0.]
      [1. 0. 0.]]
+    >>> print(dec.det())
+    -24.0
+    >>> print(dec.inv())
+    [[-1.41666667 -0.125       0.54166667]
+     [-0.25        0.125       0.125     ]
+     [ 0.83333333  0.25       -0.08333333]]
     '''
 
-    def __init__(self, pivoting=True, debug=False, precision=None):
+    def __init__(self, a, pivoting=True, debug=False, precision=None):
         '''
         Parametros:
+        a: np.array 2d quadrado
+            Matriz a ser decomposta
         pivoting: bool (padrão True)
             Determina se deve usar pivotação parcial.
         debug: bool (padrão False)
@@ -39,9 +45,30 @@ class LU:
             iteração externa.
         '''
 
+        self.matrix = a.astype(float)
         self.pivoting = pivoting
         self.debug = debug
         self.precision = precision
+        self._setUp()
+        self._execute()
+
+    @property
+    def det(self):
+        if not hasattr(self, '_det'):
+            self._det = self.LU.diagonal().prod() * (-1) ** self.swap_count
+        return self._det
+
+    def solve(self, b):
+        t = successive_substitutions(self.LU, self.p @ b, diag=False)
+        x = retroactive_substitutions(self.LU, t)
+        return x
+
+    def inv(self):
+        out = np.zeros_like(self.LU)
+        e = np.identity(self.N)
+        for i in range(self.N):
+            out[:,i] = self.solve(e[:,i])
+        return out
 
     def _setUp(self):
         # Cria as matrizes LU e p.
@@ -105,61 +132,8 @@ class LU:
         if self.precision is not None:
             self.LU = self.LU.round(self.precision)
 
-    def _diagonal_ones(self, matrix):
-        # retorna a matriz passada com sua diagonal principal = 1.
-        matrix = matrix.copy()
-        for i in range(self.N):
-            matrix[i, i] = 1
-        return matrix
-
-    def _get_lower_trig(self, matrix):
-        # retorna o triângulo inferior da matriz dada.
-        out = np.array(matrix)
-        for i in range(matrix.shape[0]):
-            for j in range(i + 1, matrix.shape[1]):
-                out[i, j] = 0
-        return out
-
-    @classmethod
-    def _get_upper_trig(self, matrix):
-        # retorna o triângulo superior da matriz dada.
-        out = np.array(matrix)
-        for i in range(matrix.shape[0]):
-            for j in range(i):
-                out[i,j] = 0
-        return out
-
-    @property
-    def _L(self):
-        # retorna a matriz L referente a LU.
-        return self._diagonal_ones(self._get_lower_trig(self.LU))
-
-    @property
-    def _U(self):
-        # retorna a matriz U referente a LU.
-        return self._get_upper_trig(self.LU)
-
-    def __call__(self, matrix):
-        '''
-        Parâmetros:
-        matrix: np.array 2d simétrico
-            Matriz que se deseja decompor.
-        --------
-        Retorno:
-        L: np.array
-            matriz triangular inferior tal que LU = pA
-        U: np.array
-            matriz triangular superior tal que LU = pA
-        p: np.array
-            matriz identidade permutada tal que LU = pA. Se não foi usada a 
-            pivotação, p é a matriz identidade.
-        sign: 1 ou -1
-            valor tal que det(A) = sign * det(U), ou seja, sign = (-1) ** t,
-            onde t é o número mínimo de trocas na matriz identidate para chegar 
-            na matriz p.
-        '''
-
-        self.matrix = matrix.astype(float)
+    def _execute(self):
+        # executa a decomposição
         self.swap_count = 0
         self._setUp()
         for pivot_line in range(self.N):
@@ -169,4 +143,3 @@ class LU:
             self._show_steps(pivot_line)
             for cur_line in range(pivot_line + 1, self.N):
                 self._apply_pivot(pivot_line, cur_line)
-        return self._L, self._U, self.p, (-1) ** self.swap_count

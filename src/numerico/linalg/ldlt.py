@@ -1,13 +1,18 @@
 import numpy as np
 
+from .core import Decomposition, successive_substitutions, \
+                  retroactive_substitutions
 
-class LDLt:
-    def __init__(self, precision=None):
+class LDLt(Decomposition):
+    def __init__(self, a, precision=None):
+        self.a = a.copy().astype(float)
+        self.n = len(a)
         self.precision = precision
+        self._execute()
 
-    def __call__(self, a):
-        out = a.copy().astype(float)
-        n = len(a)
+    def _execute(self):
+        out = self.a.copy()
+        n = len(self.a)
         for j in range(n):
             cum = 0
             for k in range(j):
@@ -22,5 +27,28 @@ class LDLt:
                 out[i,j] *= r
                 out[j,i] = out[i,j]
             if self.precision is not None: out = out.round(self.precision)
-        self.out = out
-        return out
+        self.ldlt = out
+
+    @property
+    def det(self):
+        if not hasattr(self, '_det'):
+            prod = 1
+            for i in range(self.n):
+                prod *= self.ldlt[i,i]
+            self._det = prod
+        return self._det
+
+    def solve(self, b):
+        t = successive_substitutions(self.ldlt, b, diag=False)
+        u = t / self.ldlt.diagonal()
+        x = retroactive_substitutions(self.ldlt, u, diag=False)
+        return x
+
+    def inv(self):
+        if not hasattr(self, '_inv'):
+            e = np.identity(self.n)
+            out = np.zeros_like(self.a).astype(float)
+            for i in range(self.n):
+                out[:,i] = self.solve(e[:,i])
+            self._inv = out
+        return self._inv

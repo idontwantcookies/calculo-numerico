@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..linalg import solve
+from ..linalg import Cholesky
 
 
 class Polynomial:
@@ -32,9 +32,10 @@ class Polynomial:
     @property
     def coefs(self):
         if not hasattr(self, '_coefs'):
-            self._coefs = solve(self.X, self.Y).real
-            self._coefs = list(reversed(self._coefs))
-            self._coefs = np.poly1d(self._coefs)
+            chol = Cholesky(self.X)
+            out = chol.solve(self.Y)
+            out = list(reversed(out))
+            self._coefs = np.poly1d(out)
         return self._coefs
 
     def __call__(self, x_pred):
