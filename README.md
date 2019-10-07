@@ -20,9 +20,9 @@ a = np.array([
     [2, 3]
 ])
 lu = linalg.LU(a)
-print(lu.det)
-print(lu.inv())
-print(lu.solve([2,-1]))
+print(lu.det)           # -7
+print(lu.inv())         # np.array([[-0.42857143  0.71428571] [ 0.28571429 -0.14285714]])
+print(lu.solve([2,-1])) # [-1.57142857  0.71428571]
 ```
 Além da decomposição LU, estão disponíveis Cholesky e LDLt. Use Cholesky e LDLt para matrizes simétricas; Cholesky se você não se importa de obter resultados complexos, e LDLt para evitar o cálculo de raízes.
 
