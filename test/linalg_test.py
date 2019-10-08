@@ -115,6 +115,13 @@ class LinalgTest(unittest.TestCase):
         self.assertTrue(gs.converges)
         self.assertTrue((x.round() == [0,-1,1]).all())
 
+    def test_sor(self):
+        sor = linalg.SOR(self.A, omega=1.2)
+        b = np.array([-5, -15])
+        x = sor(b)
+        self.assertFalse(sor.converges)
+        self.assertTrue((x.round() == [0, -1]).all())
+
 
 if __name__ == '__main__':
     unittest.main()
