@@ -104,20 +104,16 @@ class LinalgTest(unittest.TestCase):
         self.assertEqual(round(dec.det), 262)
 
     def test_jacobi(self):
-        jacobi = linalg.Jacobi(self.A)
-        x = jacobi(np.array([2,5]))
-        r = [2,5] - self.A @ x
-        err = max(r)
-        self.assertFalse(jacobi.converges)
-        self.assertLess(err, 0.001)
+        jacobi = linalg.Jacobi(self.A2)
+        x = jacobi(np.array([3,-4,6]))
+        self.assertTrue(jacobi.converges)
+        self.assertTrue((x.round() == [0,-1,1]).all())
 
     def test_gauss_seidel(self):
-        gs = linalg.GaussSeidel(self.A)
-        x = gs(np.array([2,5]))
-        r = [2,5] - self.A @ x
-        err = max(r)
-        self.assertFalse(gs.converges)
-        self.assertLess(err, 0.001)
+        gs = linalg.GaussSeidel(self.A2)
+        x = gs(np.array([3,-4,6]))
+        self.assertTrue(gs.converges)
+        self.assertTrue((x.round() == [0,-1,1]).all())
 
 
 if __name__ == '__main__':
