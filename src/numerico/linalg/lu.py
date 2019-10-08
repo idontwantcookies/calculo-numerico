@@ -97,8 +97,6 @@ class LU(Decomposition):
         if self.pivoting:
             pivotal_col = self.LU[column:, column]
             i, pivot = self._max(pivotal_col)
-            if pivot == 0:
-                raise ZeroDivisionError('Can\'t decompose a singular matrix (det = 0).')
             i += column
         else:
             i = column
@@ -138,6 +136,9 @@ class LU(Decomposition):
         self._setUp()
         for pivot_line in range(self.N):
             i, pivot = self._pick_pivot(pivot_line)
+            if pivot == 0:
+                self.LU[i:, i:] = 0
+                break
             self._swap(i, pivot_line)
             self._round()
             self._show_steps(pivot_line)

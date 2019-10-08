@@ -21,6 +21,15 @@ class LinalgTest(unittest.TestCase):
         self.assertEqual(dec.det, 25)
         self.assertTrue(((self.A @ dec.inv()).round(5) == np.identity(2)).all())
 
+    def test_lu_singular_det(self):
+        S = np.array([[ -3,   3,   4,   2,   7],
+                      [  0,   7,  -3,  -5,   1],
+                      [ -3,  -5,   5,   6,  -1],
+                      [ -9, -14,  17,  19,   4],
+                      [-15, -72,  50,  67,   2]])
+        dec = linalg.LU(S)
+        self.assertEqual(round(dec.det, 6), 0)
+
     def test_cholesky(self):
         dec = linalg.Cholesky(self.X)
         L = dec.L
@@ -93,6 +102,22 @@ class LinalgTest(unittest.TestCase):
     def test_ldlt_det(self):
         dec = linalg.LDLt(self.A2)
         self.assertEqual(round(dec.det), 262)
+
+    def test_jacobi(self):
+        jacobi = linalg.Jacobi(self.A)
+        x = jacobi(np.array([2,5]))
+        r = [2,5] - self.A @ x
+        err = max(r)
+        self.assertFalse(jacobi.converges)
+        self.assertLess(err, 0.001)
+
+    def test_gauss_seidel(self):
+        gs = linalg.GaussSeidel(self.A)
+        x = gs(np.array([2,5]))
+        r = [2,5] - self.A @ x
+        err = max(r)
+        self.assertFalse(gs.converges)
+        self.assertLess(err, 0.001)
 
 
 if __name__ == '__main__':

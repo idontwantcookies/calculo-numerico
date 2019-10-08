@@ -4,3 +4,5 @@ from .core import (square, simmetrical, is_lower_trig,
 from .lu import LU
 from .cholesky import Cholesky
 from .ldlt import LDLt
+from .jacobi import Jacobi
+from .gauss_seidel import GaussSeidel
