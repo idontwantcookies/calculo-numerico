@@ -1,3 +1,4 @@
+import pdb
 import unittest
 
 import numpy as np
@@ -142,6 +143,14 @@ class LinalgTest(unittest.TestCase):
         x = sor.solve(b)
         self.assertFalse(sor.converges)
         self.assertTrue((x.round() == [0, -1]).all())
+
+    def test_krylov(self):
+        coefs = linalg.poly(self.A)
+        delta = (39)**0.5
+        lambda1 = 8 - delta # autovalor 1
+        lambda2 = 8 + delta # autovalor 2
+        self.assertEqual(coefs(lambda1), 0)
+        self.assertEqual(coefs(lambda2), 0)
 
 
 if __name__ == '__main__':
