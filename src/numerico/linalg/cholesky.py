@@ -58,7 +58,7 @@ class Cholesky(Decomposition):
 
     def _round(self):
         if self.precision is not None:
-            self.L = self.L._round(self.precision)
+            self.L = self.L.round(self.precision)
 
     def _execute(self):
         for j in range(self.n):

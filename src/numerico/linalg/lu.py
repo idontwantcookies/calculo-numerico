@@ -45,7 +45,7 @@ class LU(Decomposition):
             iteração externa.
         '''
 
-        self.matrix = a.astype(float)
+        self.a = a.astype(float)
         self.pivoting = pivoting
         self.debug = debug
         self.precision = precision
@@ -72,8 +72,8 @@ class LU(Decomposition):
 
     def _setUp(self):
         # Cria as matrizes LU e p.
-        self.N = self.matrix.shape[0]
-        self.LU = self.matrix.copy()
+        self.N = self.a.shape[0]
+        self.LU = self.a.copy()
         self.p = np.identity(self.N)
 
     def _swap_rows(self, matrix, i, j):

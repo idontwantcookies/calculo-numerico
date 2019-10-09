@@ -21,6 +21,13 @@ class LinalgTest(unittest.TestCase):
         self.assertEqual(dec.det, 25)
         self.assertTrue(((self.A @ dec.inv()).round(5) == np.identity(2)).all())
 
+    def test_lu_refine(self):
+        dec = linalg.LU(self.A2, precision=2)
+        b = np.array([3, -5, -8])
+        x0 = dec.solve(b)
+        x = dec.refine(b, x0)
+        self.assertTrue((x.round(2) == [1,0,-1]).all())
+
     def test_lu_singular_det(self):
         S = np.array([[ -3,   3,   4,   2,   7],
                       [  0,   7,  -3,  -5,   1],
@@ -35,6 +42,13 @@ class LinalgTest(unittest.TestCase):
         L = dec.L
         mult = (L @ L.T).round()
         self.assertTrue((mult == self.X).all())
+
+    def test_cholesky_refine(self):
+        dec = linalg.Cholesky(self.A2, precision=2)
+        b = np.array([3, -5, -8])
+        x0 = dec.solve(b)
+        x = dec.refine(b, x0)
+        self.assertTrue((x.round(2) == [1,0,-1]).all())
 
     def test_cholesky_det(self):
         dec = linalg.Cholesky(self.X)
@@ -102,6 +116,13 @@ class LinalgTest(unittest.TestCase):
     def test_ldlt_det(self):
         dec = linalg.LDLt(self.A2)
         self.assertEqual(round(dec.det), 262)
+
+    def test_ldlt_refine(self):
+        dec = linalg.LDLt(self.A2, precision=2)
+        b = np.array([3, -5, -8])
+        x0 = dec.solve(b)
+        x = dec.refine(b, x0)
+        self.assertTrue((x.round(2) == [1,0,-1]).all())
 
     def test_jacobi(self):
         jacobi = linalg.Jacobi(self.A2)

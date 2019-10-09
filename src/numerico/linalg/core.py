@@ -20,6 +20,20 @@ class Decomposition(abc.ABC):
     def _execute(self):
         pass
 
+    def refine(self, b, x0, tol=1e-5, max_iter=500, new_precision=None):
+        if new_precision is not None: self.precision = new_precision
+        x = x0.copy()
+        i = 0
+        while i < max_iter:
+            r = b - self.a @ x
+            c = self.solve(r)
+            err = max(abs(c / x))
+            x += c
+            if err < tol: break
+            i += 1
+        return x
+
+
 
 def square(a):
     '''Testa se um array é matriz quadrada.'''
