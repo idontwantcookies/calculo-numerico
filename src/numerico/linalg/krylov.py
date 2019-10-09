@@ -3,7 +3,7 @@ import numpy as np
 from .lu import LU
 
 
-def poly(a):
+def krylov_poly(a):
         n = len(a)
         y = np.array([1] + [0] * (n - 1))
         Y = []
