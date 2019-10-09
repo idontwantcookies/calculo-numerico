@@ -105,20 +105,20 @@ class LinalgTest(unittest.TestCase):
 
     def test_jacobi(self):
         jacobi = linalg.Jacobi(self.A2)
-        x = jacobi(np.array([3,-4,6]))
+        x = jacobi.solve(np.array([3,-4,6]))
         self.assertTrue(jacobi.converges)
         self.assertTrue((x.round() == [0,-1,1]).all())
 
     def test_gauss_seidel(self):
         gs = linalg.GaussSeidel(self.A2)
-        x = gs(np.array([3,-4,6]))
+        x = gs.solve(np.array([3,-4,6]))
         self.assertTrue(gs.converges)
         self.assertTrue((x.round() == [0,-1,1]).all())
 
     def test_sor(self):
         sor = linalg.SOR(self.A, omega=1.2)
         b = np.array([-5, -15])
-        x = sor(b)
+        x = sor.solve(b)
         self.assertFalse(sor.converges)
         self.assertTrue((x.round() == [0, -1]).all())
 

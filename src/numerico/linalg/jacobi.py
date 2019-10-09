@@ -34,12 +34,14 @@ class Jacobi:
         if self.debug:
             print(self.iter, *self.x, self.err, sep='\t')
 
-    def __call__(self, b, x0=None):
+    def _build_x0(self):
+        return self.b.copy()
+
+    def solve(self, b, x0=None):
         self.err = None
         self.b = b
         self._build_b()
-        if x0 is None: x0 = np.zeros_like(b).astype(float)
-        self.x = x0
+        self.x = self._build_x0() if x0 is None else x0.copy()
         self.iter = 0
         while self.iter < self.max_iter:
             self._debug()
