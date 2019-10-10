@@ -24,11 +24,12 @@ class GregoryNewton(Newton):
                 self.dely[i, j] = self.dely[i+1, j-1] - self.dely[i, j-1]
 
     def __call__(self, x_est):
+        slc = self._pick_points(x_est)
         aux = (x_est - self.x[0]) / self.diff
         out = 0
-        for i in range(self.n):
-            prod = self.dely[0, i] / factorial(i)
-            for j in range(i):
+        for order in range(self.rank + 1):
+            prod = self.get_dely(slc.start, order) / factorial(order)
+            for j in range(slc.start, order):
                 prod *= aux - j
             out += prod
         return out

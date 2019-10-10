@@ -19,8 +19,9 @@ class Lagrange(Vandermonde):
 
     def __call__(self, x_est):
         self.set_diag(x_est)
+        slc = self._pick_points(x_est)
         out = 0
-        for i in range(self.n):
-            out += self.y[i] / self.G[i].prod()
-        out *= self.G.diagonal().prod()
+        for i in range(slc.start, slc.stop):
+            out += self.y[i] / self.G[i, slc].prod()
+        out *= self.G[slc, slc].diagonal().prod()
         return out

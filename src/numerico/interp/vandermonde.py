@@ -1,20 +1,37 @@
 import numpy as np
 
+from .core import choose_points, sort_points
 from ..linalg import LU
 
+
 class Vandermonde:
-    
-    def __init__(self, x, y):
+
+    def __init__(self, x, y, rank=1):
+        self.polys = {}
         self.x, self.y = x.copy(), y.copy()
+        self.rank = rank
+        self._sort()
         self.validate_points()
         self.setUp()
 
+    @property
+    def rank(self):
+        return self.__rank
+
+    @rank.setter
+    def rank(self, value):
+        if value >= len(self.x):
+            raise ValueError('rank must be between 0 and n-1.')
+        self.__rank = value
+
+    def _sort(self):
+        self.x, self.y = sort_points(self.x, self.y)
+
     def setUp(self):
-        self.n = len(self.x)
-        self.rank = self.n - 1
-        self.V = np.zeros((self.n, self.n))
+        n = len(self.x) + 1
+        self.V = np.zeros((len(self.x), n))
         self.V[:,0] = 1
-        for i in range(1, self.n):
+        for i in range(1, n):
             self.V[:,i] = self.x ** i
 
     def validate_points(self):
@@ -23,17 +40,19 @@ class Vandermonde:
         if self.x.ndim != 1:
             raise ValueError('Please pass x and y as separate one-dimensional arrays.')
 
-    @property
-    def coefs(self):
-        if not hasattr(self, '_coefs'):
-            lu = LU(self.V)
-            out = lu.solve(self.y)
-            out = list(reversed(out))
-            out = np.array(out)
-            out = np.poly1d(out)
-            self._coefs = out
-        return self._coefs
+    def coefs(self, slc):
+        lu = LU(self.V[slc, :self.rank + 1])
+        out = lu.solve(self.y[slc])
+        out = list(reversed(out))
+        out = np.array(out)
+        out = np.poly1d(out)
+        return out
+
+    def _pick_points(self, x_est):
+        pts = choose_points(self.x, x_est, self.rank + 1)
+        return slice(pts[0], pts[-1] + 1)
 
     def __call__(self, x_est):
-        # return np.polyval(self.coefs, x_est)
-        return self.coefs(x_est)
+        slc = self._pick_points(x_est)
+        poly = self.coefs(slc)
+        return poly(x_est)
