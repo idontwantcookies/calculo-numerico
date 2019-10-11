@@ -57,5 +57,24 @@ class InterpTest(unittest.TestCase):
         pred = round(pred, 4)
         self.assertEqual(pred, 2.0604)
 
+    def test_natural_spline(self):
+        x = np.array([1,2,4,6,7])
+        y = np.array([2,4,1,3,3])
+        spl = interp.NaturalSpline(x, y)
+        for i, value in enumerate(x):
+            self.assertEqual(round(spl(value)), y[i])
+
+    def test_natural_spline2(self):
+        spl = interp.NaturalSpline(self.x, self.y)
+        for x, y in zip(self.x, self.y):
+            self.assertEqual(round(spl(x), 4), y)
+
+    def test_extrapolated_spline(self):
+        x = np.array([1,2,4,6,7])
+        y = np.array([2,4,1,3,3])
+        spl = interp.NotAKnotSpline(x, y)
+        for i, value in enumerate(x):
+            self.assertEqual(round(spl(value)), y[i])
+
 if __name__ == '__main__':
     unittest.main()

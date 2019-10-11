@@ -27,9 +27,13 @@ class CoreInterp:
 
     @rank.setter
     def rank(self, value):
-        if value >= len(self.x):
-            raise ValueError('rank must be between 0 and n-1.')
+        valid, err_msg = self._valid_rank(value)
+        if not valid:
+            raise ValueError(err_msg)
         self.__rank = value
+
+    def _valid_rank(self, rank):
+        return rank >= len(self.x), 'rank must be between 0 and n-1.'
 
     def _pick_points(self, x_est):
         pts = choose_points(self.x, x_est, self.rank + 1)
