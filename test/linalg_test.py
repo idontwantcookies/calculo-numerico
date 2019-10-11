@@ -16,6 +16,11 @@ class LinalgTest(unittest.TestCase):
                             [ 2,  4,  10]])
         self.X = self.A @ self.A.T
 
+    def test_gauss(self):
+        b = np.array([ 3, -5, -8])
+        x, det = linalg.gauss(self.A2, b)
+        self.assertTrue((x == [1,0,-1]).all())
+
     def test_lu(self):
         dec = linalg.LU(self.A)
         self.assertEqual(dec.det, 25)

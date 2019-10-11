@@ -12,3 +12,34 @@ def choose_points(x, x_est, n_points):
 def sort_points(x, y):
     indices = x.argsort()
     return x[indices], y[indices]
+
+
+class CoreInterp:
+
+    def __init__(self, x, y, rank=1):
+        self._set_x_y(x, y)
+        self._validate_points()
+        self.rank = rank
+
+    @property
+    def rank(self):
+        return self.__rank
+
+    @rank.setter
+    def rank(self, value):
+        if value >= len(self.x):
+            raise ValueError('rank must be between 0 and n-1.')
+        self.__rank = value
+
+    def _pick_points(self, x_est):
+        pts = choose_points(self.x, x_est, self.rank + 1)
+        return slice(pts[0], pts[-1] + 1)
+
+    def _set_x_y(self, x, y):
+        self.x, self.y = sort_points(x, y)
+
+    def _validate_points(self):
+        if self.x.shape != self.y.shape:
+            raise ValueError('x and y must be the same size.')
+        if self.x.ndim != 1:
+            raise ValueError('Please pass x and y as separate one-dimensional arrays.')

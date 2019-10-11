@@ -7,7 +7,6 @@ from ..linalg import LU
 class Vandermonde:
 
     def __init__(self, x, y, rank=1):
-        self.polys = {}
         self.x, self.y = x.copy(), y.copy()
         self.rank = rank
         self._sort()
