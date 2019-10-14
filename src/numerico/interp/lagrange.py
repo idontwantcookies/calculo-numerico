@@ -1,3 +1,6 @@
+import pdb
+from math import factorial
+
 import numpy as np
 
 from .vandermonde import Vandermonde
@@ -25,3 +28,13 @@ class Lagrange(Vandermonde):
             out += self.y[i] / self.G[i, slc].prod()
         out *= self.G[slc, slc].diagonal().prod()
         return out
+
+    def trunc_error(self, x_est, dn_func):
+        # dn_func é a n+1-ésima derivada da função sendo interpolada
+        f_epslon = 0
+        prod = 1
+        for x in self.x[self._pick_points(x_est)]:
+            u = dn_func(x)
+            if abs(u) > f_epslon: f_epslon = u
+            prod *= x_est - x
+        return abs(f_epslon / factorial(self.rank + 1) * prod)

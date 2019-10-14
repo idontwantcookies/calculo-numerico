@@ -76,5 +76,15 @@ class InterpTest(unittest.TestCase):
         for i, value in enumerate(x):
             self.assertEqual(round(spl(value)), y[i])
 
+    def test_truncation_error(self):
+        func = lambda x: 48 * x
+        x = np.array([0, 0.2, 0.4])
+        y = np.array([1, 1.1232, 1.5312])
+        newton = interp.Newton(x, y, rank=2)
+        err = newton.trunc_error(0.1, func)
+        err = round(err, 4)
+        self.assertEqual(err, 0.0096)
+
+
 if __name__ == '__main__':
     unittest.main()

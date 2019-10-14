@@ -9,6 +9,7 @@ setup(
       author_email='muniz.r.felipe@gmail.com',
       url='https://github.com/fmuniz351987/calculo-numerico',
       package_dir={'': 'src'},
-      packages=['numerico', 'numerico.linalg', 'numerico.interp', 'numerico.regression'],
+      packages=['numerico', 'numerico.linalg', 'numerico.interp', 
+                'numerico.regression', 'numerico.integral'],
       install_requires=['numpy>=1.17.2']
     )
