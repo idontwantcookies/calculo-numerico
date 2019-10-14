@@ -1,9 +1,10 @@
 import numpy as np
 
 from ..linalg import Cholesky
+from .linear import Linear
 
 
-class Polynomial:
+class Polynomial(Linear):
 
     def __init__(self, x, y, rank=1):
         '''
@@ -12,28 +13,29 @@ class Polynomial:
             y: np.array de uma dimensão (output)
         '''
         self.n = rank + 1
-        self.x = [x.shape[0]]
-        self.Y = [y.sum()]
+        self.x, self.y = x.copy(), y.copy()
+        self.x_sums = [x.shape[0]]
+        self.y_sums = [y.sum()]
         for i in range(1, 2 * rank + 1):
             x_pow = x**i
-            self.x.append((x_pow).sum())
+            self.x_sums.append((x_pow).sum())
             if i < self.n:
-                self.Y.append((x_pow * y).sum())
-        self.x, self.Y = np.array(self.x), np.array(self.Y)
+                self.y_sums.append((x_pow * y).sum())
+        self.x_sums, self.y_sums = np.array(self.x_sums), np.array(self.y_sums)
         self.setUp()
 
     def setUp(self):
         self.X = np.zeros((self.n, self.n))
         for i in range(self.n):
             for j in range(i+1):
-                self.X[i,j] = self.x[i+j]
-                self.X[j,i] = self.x[i+j]
+                self.X[i,j] = self.x_sums[i+j]
+                self.X[j,i] = self.x_sums[i+j]
 
     @property
     def coefs(self):
         if not hasattr(self, '_coefs'):
             chol = Cholesky(self.X)
-            out = chol.solve(self.Y)
+            out = chol.solve(self.y_sums)
             out = list(reversed(out))
             self._coefs = np.poly1d(out)
         return self._coefs

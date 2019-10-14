@@ -43,3 +43,15 @@ class RegressionTest(unittest.TestCase):
             pred = reg(x[i])
             pred = round(pred, 1)
             self.assertEqual(pred, y[i])
+
+    def test_poly_regression_quality(self):
+        reg = regression.Polynomial(self.x1[:,0], self.y, rank=1)
+        self.assertEqual(round(reg.D, 4), 0.9289)
+        self.assertEqual(round(reg.r, 4), 0.8506)
+        self.assertEqual(round(reg.r**2, 4), 0.7235)
+
+    def test_linear_regression_quality(self):
+        reg = regression.Linear(self.x1, self.y)
+        self.assertEqual(round(reg.D, 4), 0.9289)
+        self.assertEqual(round(reg.r, 4), 0.8506)
+        self.assertEqual(round(reg.r**2, 4), 0.7235)
