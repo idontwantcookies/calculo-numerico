@@ -13,7 +13,7 @@ class GregoryNewton(Newton):
         for i in range(1, len(self.x) - 1):
             if self.x[i+1] - self.x[i] != diff:
                 raise ValueError('All x coordinates must be equally spaced. '
-                    'Use Newton interp for uneven spaced x-coordinates.')
+                    'Use Newton interpolation for uneven spaced x-coordinates.')
         self.diff = diff
 
     def build_dely(self):

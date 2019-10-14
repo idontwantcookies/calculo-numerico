@@ -1,4 +1,4 @@
 from . import linalg
-from . import interp
+from . import interpolation
 from . import regression
 from . import integral

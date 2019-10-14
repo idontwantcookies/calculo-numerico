@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from numerico import interp
+from numerico import interpolation as interp
 
 
 def random_points(n=10):
