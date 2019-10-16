@@ -1,5 +1,5 @@
-import pdb
 import unittest
+import math
 
 import numpy as np
 
@@ -27,3 +27,11 @@ class IntegralTest(unittest.TestCase):
         nc = integral.NewtonCotes(x, y, rank=3)
         area = round(nc(), 4)
         self.assertEqual(area, 8.5633)
+
+    def test_gaus_legendre(self):
+        func = lambda x: math.exp(x) + math.sin(x) + 2
+        a = 0
+        b = math.pi
+        gl = integral.GaussLegendre(a, b, 5, func)
+        exp = round(gl(), 4)
+        self.assertEqual(exp, 30.4239)
