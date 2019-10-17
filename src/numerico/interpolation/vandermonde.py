@@ -7,7 +7,7 @@ from ..linalg import LU
 class Vandermonde:
 
     def __init__(self, x, y, rank=1):
-        self.x, self.y = x.copy(), y.copy()
+        self.x, self.y = np.array(x), np.array(y)
         self.rank = rank
         self._sort()
         self.validate_points()

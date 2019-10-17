@@ -45,7 +45,7 @@ class LU(Decomposition):
             iteração externa.
         '''
 
-        self.a = a.astype(float)
+        self.a = np.array(a).astype(float)
         self.pivoting = pivoting
         self.debug = debug
         self.precision = precision
@@ -59,6 +59,7 @@ class LU(Decomposition):
         return self._det
 
     def solve(self, b):
+        b = np.array(b)
         t = successive_substitutions(self.LU, self.p @ b, diag=False)
         x = retroactive_substitutions(self.LU, t)
         return x

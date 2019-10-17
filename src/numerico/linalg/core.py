@@ -37,15 +37,18 @@ class Decomposition(abc.ABC):
 
 def square(a):
     '''Testa se um array é matriz quadrada.'''
+    a = np.array(a)
     return a.ndim == 2 and a.shape[0] == a.shape[1]
 
 def simmetrical(a):
     '''Testa se uma matriz é simétrica fazendo sua transposição.'''
+    a = np.array(a)
     return (a == a.T).all()
 
 def is_lower_trig(a):
     '''Testa se uma matriz é triangular inferior.
     Complexidade: ~n²/2 comparações (pior caso)'''
+    a = np.array(a)
     for i in range(a.shape[0]):
         for j in range(i + 1, a.shape[1]):
             if a[i,j] != 0: return False
@@ -54,6 +57,7 @@ def is_lower_trig(a):
 def is_upper_trig(a):
     '''Testa se uma matriz é triangular superior.
     Complexidade: ~n²/2 comparações (pior caso)'''
+    a = np.array(a)
     for i in range(a.shape[0]):
         for j in range(i):
             if a[i,j] != 0: return False
@@ -66,7 +70,8 @@ def successive_substitutions(a, b, diag=True):
     b: vetor de coeficientes independentes
 
     Complexidade: ~n²'''
-    b = b.copy().astype(a.dtype)
+    a, b = np.array(a), np.array(b)
+    b = b.astype(a.dtype)
     x = np.zeros_like(b)
     for i in range(a.shape[0]):
         x[i] = (b[i] - (x[:i] @ a[i, :i]))
@@ -82,7 +87,8 @@ def retroactive_substitutions(a, b, diag=True):
 
     Complexidade: ~n²'''
 
-    b = b.copy().astype(a.dtype)
+    a, b = np.array(a), np.array(b)
+    b = b.astype(a.dtype)
     x = np.zeros_like(b)
     for i in range(a.shape[0] - 1, -1, -1):
         x[i] = (b[i] - (x[i:] @ a[i, i:]))

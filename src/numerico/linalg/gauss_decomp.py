@@ -19,6 +19,7 @@ def swap_pivot(m, pivot_index):
         return 1
 
 def gauss(a, b, pivoting=True, debug=False, precision=None):
+    a, b = np.array(a), np.array(b)
     det = 1
     n = len(a)
     M = np.zeros((n, n+1))

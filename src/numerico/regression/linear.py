@@ -47,9 +47,13 @@ class Linear:
 
     @property
     def r(self):
+        return self.r2 ** 0.5
+
+    @property
+    def r2(self):
         y2_sum = (self.y**2).sum()
         y_sum2 = self.y.sum()**2 / len(self.y)
-        return (1 - self.D / (y2_sum - y_sum2))**0.5
+        return 1 - self.D / (y2_sum - y_sum2)
 
     def __call__(self, x_pred):
         if np.ndim(x_pred) == 0: x_pred = np.array([x_pred])

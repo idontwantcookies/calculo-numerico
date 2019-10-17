@@ -8,7 +8,7 @@ class GaussSeidel(Jacobi):
 
     def solve(self, b, x0=None):
         self.err = None
-        self.b = b
+        self.b = np.array(b)
         self._build_b()
         self.x = self._build_x0() if x0 is None else x0.copy()
         self.iter = 0

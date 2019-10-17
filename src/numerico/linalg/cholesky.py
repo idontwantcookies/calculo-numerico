@@ -33,7 +33,7 @@ class Cholesky(Decomposition):
             iteração (para comparar com exercícios durante estudos).
         '''
 
-        self.a = a
+        self.a = np.array(a)
         self.precision = precision
         self._setUp()
         self._execute()
@@ -69,6 +69,7 @@ class Cholesky(Decomposition):
         if (self.L.real == self.L).all(): self.L = self.L.real
 
     def solve(self, b):
+        b = np.array(b)
         t = successive_substitutions(self.L, b)
         x = retroactive_substitutions(self.L.T, t)
         return x

@@ -4,7 +4,7 @@ import numpy as np
 class Jacobi:
     def __init__(self, a, debug=False, precision=None, max_iter=500,
                  max_err=1e-5):
-        self.a = a
+        self.a = np.array(a)
         self.n = len(a)
         self._build_M()
         self.debug = debug

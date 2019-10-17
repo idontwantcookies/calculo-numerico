@@ -10,6 +10,6 @@ setup(
       url='https://github.com/fmuniz351987/calculo-numerico',
       package_dir={'': 'src'},
       packages=['numerico', 'numerico.linalg', 'numerico.interpolation', 
-                'numerico.regression', 'numerico.integral'],
+                'numerico.regression', 'numerico.integral', 'numerico.eqroot'],
       install_requires=['numpy>=1.17.2']
     )

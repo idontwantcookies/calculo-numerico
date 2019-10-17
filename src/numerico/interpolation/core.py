@@ -10,6 +10,7 @@ def choose_points(x, x_est, n_points):
     return np.array(sorted(out))
 
 def sort_points(x, y):
+    x = np.array(x)
     indices = x.argsort()
     return x[indices], y[indices]
 

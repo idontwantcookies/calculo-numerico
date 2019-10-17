@@ -5,7 +5,7 @@ from .core import Decomposition, successive_substitutions, \
 
 class LDLt(Decomposition):
     def __init__(self, a, precision=None):
-        self.a = a.copy().astype(float)
+        self.a = np.array(a).astype(float)
         self.n = len(a)
         self.precision = precision
         self._execute()
@@ -39,6 +39,7 @@ class LDLt(Decomposition):
         return self._det
 
     def solve(self, b):
+        b = np.array(b)
         t = successive_substitutions(self.ldlt, b, diag=False)
         u = t / self.ldlt.diagonal()
         x = retroactive_substitutions(self.ldlt, u, diag=False)
