@@ -12,16 +12,17 @@ class Polynomial(Linear):
             x: np.array de uma dimensão (input)
             y: np.array de uma dimensão (output)
         '''
+        self.rank = rank
         self.n = rank + 1
         self.x, self.y = x.copy(), y.copy()
         self.x_sums = [x.shape[0]]
-        self.y_sums = [y.sum()]
+        self.Y = [y.sum()]
         for i in range(1, 2 * rank + 1):
             x_pow = x**i
             self.x_sums.append((x_pow).sum())
             if i < self.n:
-                self.y_sums.append((x_pow * y).sum())
-        self.x_sums, self.y_sums = np.array(self.x_sums), np.array(self.y_sums)
+                self.Y.append((x_pow * y).sum())
+        self.x_sums, self.Y = np.array(self.x_sums), np.array(self.Y)
         self.setUp()
 
     def setUp(self):
@@ -35,7 +36,7 @@ class Polynomial(Linear):
     def coefs(self):
         if not hasattr(self, '_coefs'):
             chol = Cholesky(self.X)
-            out = chol.solve(self.y_sums)
+            out = chol.solve(self.Y)
             out = list(reversed(out))
             self._coefs = np.poly1d(out)
         return self._coefs

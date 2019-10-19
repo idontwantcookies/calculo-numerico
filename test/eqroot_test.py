@@ -1,4 +1,3 @@
-import pdb
 import unittest
 
 from numerico import eqroot

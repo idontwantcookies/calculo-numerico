@@ -6,5 +6,5 @@ def briot_ruffini(poly, a):
         aux += coef
         quot.append(aux)
     remainder = quot[-1]
-    quit = quit[:-1]
+    quot = quot[:-1]
     return quot, remainder
