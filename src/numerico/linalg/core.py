@@ -54,9 +54,9 @@ def successive_substitutions(a, b, diag=True):
     for i in range(n):
         x[i] = b[i]
         for k in range(i):
-            x[i] -= x[k] * a[i, k]
+            x[i] -= x[k] * a[i][k]
         if diag:
-            x[i] /= a[i, i]
+            x[i] /= a[i][i]
     return x
 
 def retroactive_substitutions(a, b, diag=True):
@@ -68,28 +68,59 @@ def retroactive_substitutions(a, b, diag=True):
     Complexidade: ~n²'''
 
     n = len(a)
-    x = [0] * len(b)
+    x = [0] * n
     for i in range(n-1,-1,-1):
         x[i] = b[i]
         for k in range(i + 1, n):
-            x[i] -= x[k] * a[i,k]
+            x[i] -= x[k] * a[i][k]
         if diag:
-            x[i] /= a[i, i]
+            x[i] /= a[i][i]
     return x
 
-def gauss(a, b, pivoting=True, debug=False):
-    a, b, n, det = a.copy(), b.copy(), len(a), 1
+def solve_diag(a, b):
+    n = len(a)
+    x = [0] * n
+    for i in range(n):
+        x[i] = b[i] / a[i][i]
+    return x
+
+def swap_rows(a, row1, row2):
+    aux = a[row1].copy()
+    a[row1] = a[row2]
+    a[row2] = aux
+
+def gauss(a, b, pivoting=True, debug=False, inplace=False):
+    if not inplace: a, b = a.copy(), b.copy()
+    n, det = len(a), 1
     for p in range(n):  # linha pivotal
         if pivoting:
             new_p = argmax(get_col(a, p))
-            a[p], a[new_p] = a[new_p], a[p]
-            b[p], b[new_p] = b[new_p], b[p]
+            swap_rows(a, p, new_p)
+            swap_rows(a, p, new_p)
             if new_p != p: det *= -1
-        if debug: print(a); print('-' * 80)
-        det *= a[p, p]
-        m = 1 / a[p, p]
+        if debug: print(a[p:]); print('-' * 80)
+        det *= a[p][p]
         for i in range(p + 1, n):
-            for j in range(p + 1, n):
-                a[i][j] -= m * a[i, p] * a[p]
+            m = a[i][p] / a[p][p]
+            b[i] -= m * b[p]
+            for j in range(p, n):
+                a[i][j] -= m * a[p][j]
     x = retroactive_substitutions(a, b)
     return x, det
+
+def lu(a, pivoting=True, debug=False, inplace=False):
+    if not inplace: a = a.copy()
+    n, det = len(a), 1
+    for p in range(n):
+        if pivoting:
+            new_p = argmax(get_col(a, p))
+            a[p], a[new_p] = a[new_p], a[p]
+            if new_p != p: det *= -1
+        if debug: print(a); print('-' * 80)
+        det *= a[p][p]
+        m = 1 / a[p][p]
+        for i in range(p + 1, n):
+            a[p][i] = a[i][p] * m
+            for j in range(p + 1, n):
+                a[i][j] -= m * a[i][p] * a[p][j]
+        return a, det
