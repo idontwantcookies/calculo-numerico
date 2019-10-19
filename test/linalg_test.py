@@ -74,16 +74,6 @@ class LinalgTest(unittest.TestCase):
         r = r.round(4)
         self.assertEqual(r.sum(), 0)
 
-    def test_is_lower_trig(self):
-        self.assertTrue(linalg.is_lower_trig(self.L))
-        self.assertFalse(linalg.is_lower_trig(self.A))
-        self.assertFalse(linalg.is_lower_trig(self.U))
-
-    def test_is_upper_trig(self):
-        self.assertTrue(linalg.is_upper_trig(self.U))
-        self.assertFalse(linalg.is_upper_trig(self.A))
-        self.assertFalse(linalg.is_upper_trig(self.L))
-
     def test_successive_substitutions(self):
         b = np.array([1,10])
         x = linalg.successive_substitutions(self.L, b)

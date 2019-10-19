@@ -33,36 +33,6 @@ class Decomposition(abc.ABC):
             i += 1
         return x
 
-
-
-def square(a):
-    '''Testa se um array é matriz quadrada.'''
-    a = np.array(a)
-    return a.ndim == 2 and a.shape[0] == a.shape[1]
-
-def simmetrical(a):
-    '''Testa se uma matriz é simétrica fazendo sua transposição.'''
-    a = np.array(a)
-    return (a == a.T).all()
-
-def is_lower_trig(a):
-    '''Testa se uma matriz é triangular inferior.
-    Complexidade: ~n²/2 comparações (pior caso)'''
-    a = np.array(a)
-    for i in range(a.shape[0]):
-        for j in range(i + 1, a.shape[1]):
-            if a[i,j] != 0: return False
-    return True
-
-def is_upper_trig(a):
-    '''Testa se uma matriz é triangular superior.
-    Complexidade: ~n²/2 comparações (pior caso)'''
-    a = np.array(a)
-    for i in range(a.shape[0]):
-        for j in range(i):
-            if a[i,j] != 0: return False
-    return True
-
 def successive_substitutions(a, b, diag=True):
     '''
     Faz substituições sucessivas em uma matriz escalonada triangular inferior.
@@ -74,15 +44,22 @@ def successive_substitutions(a, b, diag=True):
     b = b.astype(a.dtype)
     x = np.zeros_like(b)
     for i in range(a.shape[0]):
-        x[i] = (b[i] - (x[:i] @ a[i, :i]))
+        x[i] = b[i]
+        print(f'x{i} = ({b[i]}', end='')
+        for k in range(i):
+            x[i] -= x[k] * a[i, k]
+            print(' - ', f'({x[k]})({a[i,k]})', end='')
+        print(')', end='')
         if diag:
             x[i] /= a[i, i]
+            print(f'/ {a[i,i]}', end='')
+        print(f' = {x[i]}')
     return x
 
 def retroactive_substitutions(a, b, diag=True):
     '''
     Faz substituições retroativas em uma matriz escalonada triangular superior.
-    a: matriz triangula superiorr
+    a: matriz triangula superior
     b: vetor de coeficientes independentes
 
     Complexidade: ~n²'''
@@ -91,7 +68,7 @@ def retroactive_substitutions(a, b, diag=True):
     b = b.astype(a.dtype)
     x = np.zeros_like(b)
     for i in range(a.shape[0] - 1, -1, -1):
-        x[i] = (b[i] - (x[i:] @ a[i, i:]))
+        x[i] = (b[i] - x[i:] @ a[i, i:])
         if diag:
             x[i] /= a[i, i]
     return x
