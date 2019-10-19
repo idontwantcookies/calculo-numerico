@@ -1,7 +1,8 @@
 import unittest
 
+import numpy as np
+
 from numerico import eqroot
-from numerico.eqroot.core import briot_ruffini
 
 
 class EqRootTest(unittest.TestCase):
@@ -16,4 +17,12 @@ class EqRootTest(unittest.TestCase):
         self.assertEqual(max_neg, -0.5760434788494824)
 
     def test_briot_ruffini(self):
-        p = []
+        p = np.poly1d([1,-5,6])
+        q, r = eqroot.briot_ruffini(p, 2)
+        self.assertTrue((q == np.poly1d([1,-3])).all())
+        self.assertEqual(r, 0)
+
+    def test_bissection(self):
+        poly = np.poly1d([1,0,-1])
+        x, err = eqroot.bissection(poly, 0, 3)
+        self.assertEqual(round(x), 1)

@@ -1,5 +1,2 @@
-class Bissection:
-    def __init__(self, coef, start, stop):
-        self.start = start
-        self.stop = stop
-        self.coef = coef
+def bissection(poly, start, stop, max_iter=500, toler=1e-4)
+    pass
