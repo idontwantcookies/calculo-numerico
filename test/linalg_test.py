@@ -19,7 +19,7 @@ class LinalgTest(unittest.TestCase):
     def test_gauss(self):
         b = np.array([ 3, -5, -8])
         x, det = linalg.gauss(self.A2, b)
-        self.assertTrue((x == [1,0,-1]).all())
+        self.assertEqual(x, [1,0,-1])
 
     def test_lu(self):
         dec = linalg.LU(self.A)
@@ -77,12 +77,12 @@ class LinalgTest(unittest.TestCase):
     def test_successive_substitutions(self):
         b = np.array([1,10])
         x = linalg.successive_substitutions(self.L, b)
-        self.assertTrue((x == [1,2]).all())
+        self.assertEqual(x, [1,2])
 
     def test_retroactive_substitutions(self):
         b = np.array([2,9])
         x = linalg.retroactive_substitutions(self.U, b)
-        self.assertTrue((x == [1,1]).all())
+        self.assertEqual(x, [1,1])
 
     def test_ldlt(self):
         dec = linalg.LDLt(self.A2, precision=4)

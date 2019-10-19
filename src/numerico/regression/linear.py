@@ -57,4 +57,7 @@ class Linear:
 
     def __call__(self, x_pred):
         if np.ndim(x_pred) == 0: x_pred = np.array([x_pred])
-        return self.coefs[1:] @ x_pred + self.coefs[0]
+        out = self.coefs[0]
+        for i in range(1, len(self.coefs)):
+            out += self.coefs[i] * x_pred[i-1]
+        return out

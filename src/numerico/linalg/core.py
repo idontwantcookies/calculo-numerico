@@ -2,6 +2,15 @@ import abc
 
 import numpy as np
 
+def get_col(a, col):
+    out = []
+    for i in range(len(a)):
+        out.append(a[i][2])
+    return out
+
+def argmax(array):
+    return array.index(max(array))
+
 
 class Decomposition(abc.ABC):
     @abc.abstractmethod
@@ -26,7 +35,7 @@ class Decomposition(abc.ABC):
         i = 0
         while i < max_iter:
             r = b - self.a @ x
-            c = self.solve(r)
+            c = np.array(self.solve(r))
             err = max(abs(c / x))
             x += c
             if err < tol: break
@@ -40,20 +49,14 @@ def successive_substitutions(a, b, diag=True):
     b: vetor de coeficientes independentes
 
     Complexidade: ~n²'''
-    a, b = np.array(a), np.array(b)
-    b = b.astype(a.dtype)
-    x = np.zeros_like(b)
-    for i in range(a.shape[0]):
+    n = len(a)
+    x = [0] * n
+    for i in range(n):
         x[i] = b[i]
-        print(f'x{i} = ({b[i]}', end='')
         for k in range(i):
             x[i] -= x[k] * a[i, k]
-            print(' - ', f'({x[k]})({a[i,k]})', end='')
-        print(')', end='')
         if diag:
             x[i] /= a[i, i]
-            print(f'/ {a[i,i]}', end='')
-        print(f' = {x[i]}')
     return x
 
 def retroactive_substitutions(a, b, diag=True):
@@ -64,11 +67,29 @@ def retroactive_substitutions(a, b, diag=True):
 
     Complexidade: ~n²'''
 
-    a, b = np.array(a), np.array(b)
-    b = b.astype(a.dtype)
-    x = np.zeros_like(b)
-    for i in range(a.shape[0] - 1, -1, -1):
-        x[i] = (b[i] - x[i:] @ a[i, i:])
+    n = len(a)
+    x = [0] * len(b)
+    for i in range(n-1,-1,-1):
+        x[i] = b[i]
+        for k in range(i + 1, n):
+            x[i] -= x[k] * a[i,k]
         if diag:
             x[i] /= a[i, i]
     return x
+
+def gauss(a, b, pivoting=True, debug=False):
+    a, b, n, det = a.copy(), b.copy(), len(a), 1
+    for p in range(n):  # linha pivotal
+        if pivoting:
+            new_p = argmax(get_col(a, p))
+            a[p], a[new_p] = a[new_p], a[p]
+            b[p], b[new_p] = b[new_p], b[p]
+            if new_p != p: det *= -1
+        if debug: print(a); print('-' * 80)
+        det *= a[p, p]
+        m = 1 / a[p, p]
+        for i in range(p + 1, n):
+            for j in range(p + 1, n):
+                a[i][j] -= m * a[i, p] * a[p]
+    x = retroactive_substitutions(a, b)
+    return x, det
