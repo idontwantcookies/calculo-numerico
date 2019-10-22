@@ -79,12 +79,7 @@ class GaussLegendre(NewtonCotes):
         out = 0
         i = 0
         if self.debug: self._print_row(['t', 'F(t)', 'A'])
-        if self.n % 2 == 1:
-            if self.debug: self._print_row([t[i], self._F(t[i]), a[i]])
-            out = a[0] * self._F(0)
-            i += 1
-        while i < (self.n):
+        for i in range(self.n):
             if self.debug: self._print_row([t[i], self._F(t[i]), a[i]])
             out += a[i] * self._F(t[i])
-            i += 1
         return out
