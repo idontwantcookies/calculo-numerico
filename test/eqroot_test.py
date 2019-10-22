@@ -58,7 +58,6 @@ class EqRootTest(unittest.TestCase):
         self.assertEqual(round(x, 5), 3)
 
     def test_schroder(self):
-        print()
         func = np.poly1d([1,2,-12,14,-5])
         x, err = eqroot.schroder(func, func.deriv(), x0=2, m=3, toler=1e-5)
         self.assertEqual(round(x, 5), 1)

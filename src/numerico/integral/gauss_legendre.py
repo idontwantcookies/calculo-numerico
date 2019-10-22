@@ -1,26 +1,54 @@
 from math import sqrt
 
+import numpy as np
+
 from .newton_cotes import NewtonCotes
+from ..eqroot import newton, briot_ruffini
 
 
-# todo: auto-generate legendre poly A, t using the formulas
-# https://en.wikipedia.org/wiki/Legendre_polynomials
-# https://en.wikipedia.org/wiki/Gaussian_quadrature#Gauss%E2%80%93Legendre_quadrature
+def legendre_poly():
+    x = np.poly1d([1,0])
+    p0 = np.poly1d([1])
+    p1 = np.poly1d(x)
+    yield p0
+    yield p1
+    i = 1
+    while True:
+        i += 1
+        p2 = ((2 * i - 1) * x * p1 - (i - 1) * p0) / i
+        p0, p1 = p1, p2
+        yield p2
 
-coefs = {
-    1: {'t': [0], 'a':[2]},
-    2: {'t': [1/sqrt(3)], 'a': [1]},
-    3: {'t': [0, sqrt(3/5)], 'a': [8/9, 5/9]},
-    4: {'t': [sqrt(3/7 - 2/7*sqrt(6/5)), sqrt(3/7 + 2/7*sqrt(6/5))],
-        'a': [0.5+sqrt(30)/36, 0.5-sqrt(30)/36]},
-    5: {'t': [0, 1/3*sqrt(5 - 2*sqrt(10/7)), 1/3*sqrt(5 + 2*sqrt(10/7))],
-        'a': [128/225, (322 + 13*sqrt(70))/900, (322 - 13*sqrt(70))/900]}
-}
+def legendre_roots():
+    for n, poly in enumerate(legendre_poly()):
+        A = []
+        roots = []
+        p = poly
+        if n % 2 == 1:
+            roots.append(0)
+            p, zero = briot_ruffini(p, 0)
+            A.append(2 / (poly.deriv()(0)**2))
+        for i in range(n // 2):
+            r, err = newton(p, p.deriv(), 0.1, toler=1e-14)
+            roots.append(r)
+            roots.append(-r)
+            p, zero = briot_ruffini(p, r)
+            p, zero = briot_ruffini(p, -r)
+            A.append(2 / ((1 - r**2) * poly.deriv()(r)**2))
+            A.append(2 / ((1 - r**2) * poly.deriv()(r)**2))
+        yield roots, A
+
+coefs = {}
+for i, tpl in enumerate(legendre_roots()):
+    t, a = tpl
+    coefs[i] = {'t': t, 'a': a}
+    if i == 10: break
 
 
 class GaussLegendre(NewtonCotes):
-    def __init__(self, start, stop, n, func, debug=False):
+    def __init__(self, start, stop, n, func, debug=False, precision=None):
         self.debug = debug
+        self.precision = precision
         self.func = func
         self.start = start
         self.stop = stop
@@ -34,16 +62,29 @@ class GaussLegendre(NewtonCotes):
     def _F(self, t):
         return (self.stop - self.start) / 2 * self.func(self._x(t))
 
+    def _print_row(self, items):
+        if self.precision is not None:
+            for i, x in enumerate(items):
+                try:
+                    items[i] = round(x, self.precision)
+                except TypeError:
+                    pass
+        else:
+            precision = 16
+        print(*(str(i).rjust(self.precision + 3) for i in items), sep='\t')
+
     def __call__(self):
         a = coefs[self.n]['a']
         t = coefs[self.n]['t']
         out = 0
         i = 0
+        if self.debug: self._print_row(['t', 'F(t)', 'A'])
         if self.n % 2 == 1:
+            if self.debug: self._print_row([t[i], self._F(t[i]), a[i]])
             out = a[0] * self._F(0)
             i += 1
-        while i < (self.n + 1) // 2:
+        while i < (self.n):
+            if self.debug: self._print_row([t[i], self._F(t[i]), a[i]])
             out += a[i] * self._F(t[i])
-            out += a[i] * self._F(-t[i])
             i += 1
         return out
