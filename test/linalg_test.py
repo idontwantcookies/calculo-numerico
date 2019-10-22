@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 
 from numerico import linalg
+from numerico.linalg.core import lu, argmax, identity
 
 
 class LinalgTest(unittest.TestCase):
@@ -16,6 +17,10 @@ class LinalgTest(unittest.TestCase):
                             [ 2,  4,  10]])
         self.X = self.A @ self.A.T
 
+    def test_argmax(self):
+        index = argmax([2, -4, 5, 10, -11, 8, -7, 11])
+        self.assertEqual(index, 4)
+
     def test_gauss(self):
         b = [ 3, -5, -8]
         x, det = linalg.gauss(self.A2.tolist(), b)
@@ -25,6 +30,14 @@ class LinalgTest(unittest.TestCase):
         dec = linalg.LU(self.A)
         self.assertEqual(dec.det, 25)
         self.assertTrue(((self.A @ dec.inv()).round(5) == np.identity(2)).all())
+
+    def test_lu2(self):
+        a, det, e = lu(self.A.tolist())
+        self.assertEqual(det, 25)
+        self.assertEqual(a[0][0], -2)
+        self.assertEqual(a[0][1], 15)
+        self.assertEqual(a[1][0], -0.5)
+        self.assertEqual(a[1][1], 12.5)
 
     def test_lu_refine(self):
         dec = linalg.LU(self.A2, precision=2)

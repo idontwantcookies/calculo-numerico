@@ -5,12 +5,29 @@ import numpy as np
 def get_col(a, col):
     out = []
     for i in range(len(a)):
-        out.append(a[i][2])
+        out.append(a[i][col])
     return out
 
 def argmax(array):
-    return array.index(max(array))
+    return array.index(max(array, key=lambda x: abs(x)))
 
+def get_pivot(array, p):
+    col = get_col(array, p)[p:]
+    return argmax(col) + p
+
+def zeros(m, n):
+    out = []
+    for i in range(m):
+        out.append([])
+        for j in range(n):
+            out[i].append(0)
+    return out
+
+def identity(n):
+    out = zeros(n, n)
+    for i in range(n):
+        out[i][i] = 1
+    return out
 
 class Decomposition(abc.ABC):
     @abc.abstractmethod
@@ -84,6 +101,17 @@ def solve_diag(a, b):
         x[i] = b[i] / a[i][i]
     return x
 
+def lu_solve(a, b, e=None):
+    n = len(b)
+    if e is None:
+        e = identity(n)
+    y = zeros(n)
+    for i in range(n):
+        y[i] = b[e[i].index(1)]
+    t = successive_substitutions(a, y, diag=False)
+    x = retroactive_substitutions(a, t, diag=True)
+    return x
+
 def swap_rows(a, row1, row2):
     aux = a[row1].copy()
     a[row1] = a[row2]
@@ -94,7 +122,7 @@ def gauss(a, b, pivoting=True, debug=False, inplace=False):
     n, det = len(a), 1
     for p in range(n):  # linha pivotal
         if pivoting:
-            new_p = argmax(get_col(a, p))
+            new_p = get_pivot(a, p)
             swap_rows(a, p, new_p)
             swap_rows(a, p, new_p)
             if new_p != p: det *= -1
@@ -111,16 +139,18 @@ def gauss(a, b, pivoting=True, debug=False, inplace=False):
 def lu(a, pivoting=True, debug=False, inplace=False):
     if not inplace: a = a.copy()
     n, det = len(a), 1
+    e = type(a)(identity(n))    # keeps track of swaps on identity matrix
     for p in range(n):
         if pivoting:
-            new_p = argmax(get_col(a, p))
-            a[p], a[new_p] = a[new_p], a[p]
+            new_p = get_pivot(a, p)
+            swap_rows(a, p, new_p)
+            swap_rows(e, p, new_p)
             if new_p != p: det *= -1
-        if debug: print(a); print('-' * 80)
+        if debug: print(a[p:]); print('-' * 80)
         det *= a[p][p]
-        m = 1 / a[p][p]
         for i in range(p + 1, n):
-            a[p][i] = a[i][p] * m
+            m = a[i][p] / a[p][p]
+            a[i][p] = m
             for j in range(p + 1, n):
-                a[i][j] -= m * a[i][p] * a[p][j]
-        return a, det
+                a[i][j] -= m * a[p][j]
+    return a, det, e
