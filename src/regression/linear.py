@@ -1,11 +1,11 @@
 import numpy as np
+from src.typing import Array1D, Array2D
 
-from src.linalg.cholesky import Cholesky
+from src.linalg.gauss_decomp import gauss
 
 
 class Linear:
-
-    def __init__(self, x, y):
+    def __init__(self, x: Array2D, y: Array1D):
         '''
         Parâmetros:
             x: np.array de duas dimensões. Cada linha é um ponto e cada coluna 
@@ -32,8 +32,7 @@ class Linear:
     @property
     def coefs(self):
         if not hasattr(self, '_coefs'):
-            chol = Cholesky(self.X)
-            self._coefs = chol.solve(self.Y)
+            self._coefs, _det = gauss(self.X, self.Y)
         return self._coefs
 
     @property

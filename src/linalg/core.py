@@ -1,11 +1,16 @@
 import abc
 
 import numpy as np
+from numpy.typing import NDArray
 
+Array1D = NDArray
+Array2D = NDArray
 
 class Decomposition(abc.ABC):
+    a: Array2D
+
     @abc.abstractmethod
-    def solve(self, b):
+    def solve(self, b: Array1D):
         pass
 
     @abc.abstractmethod
@@ -20,7 +25,7 @@ class Decomposition(abc.ABC):
     def _execute(self):
         pass
 
-    def refine(self, b, x0, tol=1e-5, max_iter=500, new_precision=None):
+    def refine(self, b: Array1D, x0, tol: float = 1e-5, max_iter: int = 500, new_precision=None):
         if new_precision is not None: self.precision = new_precision
         x = x0.copy()
         i = 0
@@ -34,18 +39,19 @@ class Decomposition(abc.ABC):
         return x
 
 
-
-def square(a):
+def square(a: Array2D):
     '''Testa se um array é matriz quadrada.'''
     a = np.array(a)
     return a.ndim == 2 and a.shape[0] == a.shape[1]
 
-def simmetrical(a):
+
+def simmetrical(a: Array2D):
     '''Testa se uma matriz é simétrica fazendo sua transposição.'''
     a = np.array(a)
     return (a == a.T).all()
 
-def is_lower_trig(a):
+
+def is_lower_trig(a: Array2D):
     '''Testa se uma matriz é triangular inferior.
     Complexidade: ~n²/2 comparações (pior caso)'''
     a = np.array(a)
@@ -54,7 +60,8 @@ def is_lower_trig(a):
             if a[i,j] != 0: return False
     return True
 
-def is_upper_trig(a):
+
+def is_upper_trig(a: Array2D):
     '''Testa se uma matriz é triangular superior.
     Complexidade: ~n²/2 comparações (pior caso)'''
     a = np.array(a)
@@ -63,7 +70,8 @@ def is_upper_trig(a):
             if a[i,j] != 0: return False
     return True
 
-def successive_substitutions(a, b, diag=True):
+
+def successive_substitutions(a: Array2D, b: Array1D, diag: bool = True):
     '''
     Faz substituições sucessivas em uma matriz escalonada triangular inferior.
     a: matriz triangular inferior
@@ -79,7 +87,8 @@ def successive_substitutions(a, b, diag=True):
             x[i] /= a[i, i]
     return x
 
-def retroactive_substitutions(a, b, diag=True):
+
+def retroactive_substitutions(a: Array2D, b: Array1D, diag: bool = True):
     '''
     Faz substituições retroativas em uma matriz escalonada triangular superior.
     a: matriz triangula superiorr

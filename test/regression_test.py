@@ -11,6 +11,8 @@ class RegressionTest(unittest.TestCase):
         self.x1 = np.array([[0.3, 2.7, 4.5, 5.9, 7.8]]).T
         self.x2 = np.array([[0, 1, 2, 3, 4],
                             [-2, -1, 0, 1, 2]]).T
+        self.x3 = np.array([[0, 1, 2], [-3, 0, 2]]).T
+        self.y2 = np.array([4.1, 3.1, 3.3])
         self.y = np.array([1.8, 1.9, 3.1, 3.9, 3.3])
 
     def test_simple_regression(self):
@@ -19,9 +21,9 @@ class RegressionTest(unittest.TestCase):
         self.assertEqual(pred, 1.7909)
 
     def test_multiple_regression(self):
-        reg = Linear(self.x2, self.y)
-        pred = round(reg([0.5, 1]), 4)
-        self.assertEqual(pred, 3.3)
+        reg = Linear(self.x3, self.y2)
+        pred = round(reg([1, 1]), 4)
+        self.assertEqual(pred, 1.9)
 
     def test_poly_regression_rank1(self):
         reg = Polynomial(self.x1[:, 0], self.y, rank=1)
