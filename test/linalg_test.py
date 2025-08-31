@@ -32,7 +32,7 @@ class LinalgTest(unittest.TestCase):
 
     def test_lu(self):
         dec = LU(self.A)
-        self.assertEqual(dec.det, 25)
+        assert dec.det == 25
         self.assertTrue(((self.A @ dec.inv()).round(5) == np.identity(2)).all())
 
     def test_lu_refine(self):
@@ -49,7 +49,7 @@ class LinalgTest(unittest.TestCase):
                       [ -9, -14,  17,  19,   4],
                       [-15, -72,  50,  67,   2]])
         dec = LU(S)
-        self.assertEqual(round(dec.det, 6), 0)
+        assert round(dec.det, 6) == 0
 
     def test_cholesky(self):
         dec = Cholesky(self.X)
@@ -66,14 +66,14 @@ class LinalgTest(unittest.TestCase):
 
     def test_cholesky_det(self):
         dec = Cholesky(self.X)
-        self.assertEqual(round(dec.det, 4), 625)
+        assert round(dec.det, 4) == 625
 
     def test_cholesky_solve(self):
         b = np.array([1,2])
         dec = Cholesky(self.X)
         x = dec.solve(b)
         r = (self.X @ x - b).round(4)
-        self.assertEqual(r.sum(), 0)
+        assert r.sum() == 0
 
     def test_cholesky_inv(self):
         dec = Cholesky(self.X)
@@ -81,7 +81,7 @@ class LinalgTest(unittest.TestCase):
         e = np.identity(2)
         r = inv @ self.X - e
         r = r.round(4)
-        self.assertEqual(r.sum(), 0)
+        assert r.sum() == 0
 
     def test_is_lower_trig(self):
         self.assertTrue(is_lower_trig(self.L))
@@ -117,7 +117,7 @@ class LinalgTest(unittest.TestCase):
         x = dec.solve(b)
         r = self.A2 @ x - b
         r = r.round(4)
-        self.assertEqual(r.sum(), 0)
+        assert r.sum() == 0
 
     def test_ldlt_inv(self):
         dec = LDLt(self.A2)
@@ -125,11 +125,11 @@ class LinalgTest(unittest.TestCase):
         e = np.identity(3)
         r = e - inv @ self.A2
         r = r.round(4)
-        self.assertEqual(r.sum(), 0)
+        assert r.sum() == 0
 
     def test_ldlt_det(self):
         dec = LDLt(self.A2)
-        self.assertEqual(round(dec.det), 262)
+        assert round(dec.det) == 262
 
     def test_ldlt_refine(self):
         dec = LDLt(self.A2, precision=2)
@@ -162,8 +162,8 @@ class LinalgTest(unittest.TestCase):
         delta = (39)**0.5
         lambda1 = 8 - delta # autovalor 1
         lambda2 = 8 + delta # autovalor 2
-        self.assertEqual(coefs(lambda1), 0)
-        self.assertEqual(coefs(lambda2), 0)
+        assert coefs(lambda1) == 0
+        assert coefs(lambda2) == 0
 
 
 if __name__ == '__main__':

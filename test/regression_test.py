@@ -18,22 +18,22 @@ class RegressionTest(unittest.TestCase):
     def test_simple_regression(self):
         reg = Linear(self.x1, self.y)
         pred = round(reg(0.5), 4)
-        self.assertEqual(pred, 1.7909)
+        assert pred == 1.7909
 
     def test_multiple_regression(self):
         reg = Linear(self.x3, self.y2)
         pred = round(reg([1, 1]), 4)
-        self.assertEqual(pred, 1.9)
+        assert pred == 1.9
 
     def test_poly_regression_rank1(self):
         reg = Polynomial(self.x1[:, 0], self.y, rank=1)
         pred = round(reg(0.5), 4)
-        self.assertEqual(pred, 1.7909)
+        assert pred == 1.7909
 
     def test_poly_regression_rank2(self):
         reg = Polynomial(self.x1[:, 0], self.y, rank=2)
         pred = round(reg(0.5), 4)
-        self.assertEqual(pred, 1.6635)
+        assert pred == 1.6635
 
     def test_poly_regression_interp(self):
         ''' testa se a regressão com 3 pontos produz predições idênticas a y_i,
@@ -45,16 +45,16 @@ class RegressionTest(unittest.TestCase):
         for i in range(3):
             pred = reg(x[i])
             pred = round(pred, 1)
-            self.assertEqual(pred, y[i])
+            assert pred == y[i]
 
     def test_poly_regression_quality(self):
         reg = Polynomial(self.x1[:, 0], self.y, rank=1)
-        self.assertEqual(round(reg.D, 4), 0.9289)
-        self.assertEqual(round(reg.r, 4), 0.8506)
-        self.assertEqual(round(reg.r**2, 4), 0.7235)
+        assert round(reg.D, 4) == 0.9289
+        assert round(reg.r, 4) == 0.8506
+        assert round(reg.r**2, 4) == 0.7235
 
     def test_linear_regression_quality(self):
         reg = Linear(self.x1, self.y)
-        self.assertEqual(round(reg.D, 4), 0.9289)
-        self.assertEqual(round(reg.r, 4), 0.8506)
-        self.assertEqual(round(reg.r**2, 4), 0.7235)
+        assert round(reg.D, 4) == 0.9289
+        assert round(reg.r, 4) == 0.8506
+        assert round(reg.r**2, 4) == 0.7235
