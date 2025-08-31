@@ -13,7 +13,7 @@ E então, dentro do seu código, use `import numerico`.
 Para usar os recursos de solução e decomposição de sistemas lineares, você pode usar o seguinte código:
 ```python
 import numpy as np
-from numerico import linalg
+from src import linalg
 
 a = np.array([
     [1, 5],
@@ -32,7 +32,7 @@ O submódulo interpolation possui as interpolações usando a matriz de Vandermo
 
 ```python
 import numpy as np
-from numerico import interpolation
+from src import interpolation
 
 # interpolando uma parábola (y = x**2)
 x = np.array([-1,0,1])
@@ -50,7 +50,7 @@ O submódulo regression possui as classes Linear e Polynomial. A classe Linear d
 
 ```python
 import numpy as np
-from numerico import regression
+from src import regression
 
 # regressão do tipo y = c0 + c1x_1 + c2x_2 (linear)
 x = np.array([[0, 1, 2, 3, 4],

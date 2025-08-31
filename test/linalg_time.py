@@ -4,7 +4,7 @@ from statistics import mean
 import numpy as np
 import pandas as pd
 
-from numerico.linalg import LU, Cholesky, LDLt, Jacobi, GaussSeidel, SOR
+from src.numerico.linalg import LU, Cholesky, LDLt, Jacobi, GaussSeidel, SOR
 
 TOLER = 1e-3
 
