@@ -5,7 +5,7 @@ import numpy as np
 from src.linalg.gauss_decomp import gauss
 from src.linalg.lu import LU
 from src.linalg.cholesky import Cholesky
-from src.linalg.core import successive_substitutions, retroactive_substitutions, is_lower_trig, is_upper_trig
+from src.linalg.core import successive_substitutions, retroactive_substitutions, is_lower_trig, is_upper_trig, norm_p, norm_inf, matrix_norm_1, matrix_norm_inf, matrix_norm_frobenius
 from src.linalg.gauss_seidel import GaussSeidel
 from src.linalg.jacobi import Jacobi
 from src.linalg.krylov import krylov_poly
@@ -30,7 +30,7 @@ class LinalgTest(unittest.TestCase):
         x, det = gauss(self.A2, b)
         self.assertTrue((x == [1,0,-1]).all())
 
-    def test_lu(self):
+    def test_lu0(self):
         dec = LU(self.A)
         assert dec.det == 25
         self.assertTrue(((self.A @ dec.inv()).round(5) == np.identity(2)).all())
@@ -164,6 +164,70 @@ class LinalgTest(unittest.TestCase):
         lambda2 = 8 + delta # autovalor 2
         assert coefs(lambda1) == 0
         assert coefs(lambda2) == 0
+
+    def test_lu_solve(self):
+        A = np.array([[0., 1., 2.], [2., 2., 1.], [2., 1., 0.]])
+        b = np.array([1., 0., 1.])
+        lu = LU(A)
+        x = lu.solve(b)
+        assert np.allclose(A @ x, b, rtol=1e-10, atol=1e-12)
+
+    def test_lu2_solve(self):
+        A = np.array([[0., 1., 2.], [2., 2., 1.], [2., 1., 0.]])
+        b = np.array([1., 0., 1.])
+        lu = LU(A)
+        x = lu.solve(b)
+        assert np.allclose(A @ x, b, rtol=1e-10, atol=1e-12)
+
+    def test_lu_det(self):
+        A = np.array([[0., 1., 2.], [2., 2., 1.], [2., 1., 0.]])
+        b = np.array([1., 0., 1.])
+        lu = LU(A)
+        det_expected = np.linalg.det(A)
+        assert np.allclose(lu.det, det_expected)
+
+    def test_lu_inv(self):
+        A = np.array([[0., 1., 2.], [2., 2., 1.], [2., 1., 0.]])
+        b = np.array([1., 0., 1.])
+        lu = LU(A)
+        Ai = lu.inv()
+        assert np.allclose(A @ Ai, np.eye(3), rtol=1e-10, atol=1e-12)
+
+    def test_norm_1(self):
+        x = np.array([1, 2, 3])
+        assert norm_p(x, 1) == 6
+
+    def test_norm_inf(self):
+        x = np.array([1, 2, 3])
+        assert norm_inf(x) == 3
+
+    def test_norm_2(self):
+        x = np.array([0, 4, 3])
+        assert norm_p(x, 2) == 5
+
+    def test_norm_1_matrix(self):
+        A = np.array([
+            [1, 5, -1],
+            [3, -7, 0],
+            [0, 1, 0]
+        ])
+        assert matrix_norm_1(A) == 10
+
+    def test_norm_inf_matrix(self):
+        A = np.array([
+            [1, 5, -1],
+            [3, -7, 0],
+            [0, 1, 0]
+        ])
+        assert matrix_norm_inf(A) == 13
+
+    def test_frobenius_norm(self):
+        A = np.array([
+            [4, 3, 3],
+            [-3, 4, 4],
+            [4, 3, 0]
+        ])  # a soma dos quadrados dá 4(3² + 4²) = 4*25 = 100
+        assert matrix_norm_frobenius(A) == 10
 
 
 if __name__ == '__main__':

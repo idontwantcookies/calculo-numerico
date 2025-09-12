@@ -1,6 +1,12 @@
+import logging
+
 import numpy as np
+from src.typing import Array1D, Array2D
 
 from src.linalg.core import retroactive_substitutions
+
+
+logger = logging.getLogger(__name__)
 
 
 def swap(m, i, j):
@@ -20,8 +26,8 @@ def swap_pivot(m, pivot_index):
         return 1
 
 
-def gauss(a, b, pivoting=True, debug=False, precision=None):
-    a, b = np.array(a), np.array(b)
+def gauss(a: Array2D, b: Array1D, pivoting=True, precision=None):
+    a, b = a.copy(), b.copy()
     det = 1
     n = len(a)
     M = np.zeros((n, n+1))
@@ -30,9 +36,8 @@ def gauss(a, b, pivoting=True, debug=False, precision=None):
     for pivot in range(n):
         if pivoting:
             det *= swap_pivot(M, pivot)
-        if debug:
-            print(M)
-            print('-' * 80)
+        logger.info(f'\n{M}')
+        logger.info(f'\n{"-" * 80}')
         det *= M[pivot, pivot]
         m = - 1 / M[pivot, pivot]
         for i in range(pivot + 1, n):
